@@ -21,11 +21,6 @@ export function registerCommands(registry: CommandRegistry) {
             })
             const author = issue.data.user!!;
 
-            let isIssue =
-                typeof context.issue !== 'undefined' &&
-                typeof (context as any).pull_request === 'undefined' &&
-                (context as any).workflow_run?.pull_requests?.length === undefined;
-
             const assignees = issue.data.assignees?.map((assignee) => assignee.login)
             if (assignees && assignees.length > 0) {
                 console.log(`Removing old assignees (${assignees.join(', ')}) from issue #${issueNumber}`)
@@ -54,13 +49,6 @@ export function registerCommands(registry: CommandRegistry) {
                 assignees: toAssign
             })
 
-            // if (!isIssue) {
-            //     await client.rest.pulls.requestReviewers({
-            //         ...context.repo,
-            //         pull_number: issueNumber,
-            //         reviewers: toAssign
-            //     })
-            // }
             return true
         }
     ))

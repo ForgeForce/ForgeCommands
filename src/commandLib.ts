@@ -74,7 +74,13 @@ export class CommandRegistry {
             });
             return false;
         }
-        await command.callback(parsedCommand.arguments, client);
+        const success = await command.callback(parsedCommand.arguments, client);
+        const emoji = success ? "rocket" : "confused"
+        await client.rest.reactions.createForIssueComment({
+            ...context.repo,
+            comment_id: comment.id,
+            content: emoji
+        });
 
         debug("Command passed, able to execute job");
         return true;
