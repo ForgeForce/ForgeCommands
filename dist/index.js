@@ -9640,6 +9640,7 @@ function isInTeam(teamName) {
         });
     };
 }
+const permissions = ['none', 'read', 'write', 'admin'];
 function hasPermission(permission) {
     return function (client) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -9648,7 +9649,7 @@ function hasPermission(permission) {
                 console.log(`No user permission found in payload: ${JSON.stringify(payload, null, 2)}`);
                 return false;
             }
-            return permission.indexOf(permission) <= permission.indexOf(payload.data.permission);
+            return permissions.indexOf(permission) <= permissions.indexOf(payload.data.permission);
         });
     };
 }

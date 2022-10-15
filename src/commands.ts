@@ -14,6 +14,7 @@ function isInTeam(teamName: string): PermCheck {
 }
 
 type permission = 'none' | 'read' | 'write' | 'admin'
+const permissions = ['none', 'read', 'write', 'admin']
 function hasPermission(permission: permission): PermCheck {
     return async function(client) {
         const payload = await client.rest.repos.getCollaboratorPermissionLevel({
@@ -24,7 +25,7 @@ function hasPermission(permission: permission): PermCheck {
             console.log(`No user permission found in payload: ${JSON.stringify(payload, null, 2)}`);
             return false;
         }
-        return permission.indexOf(permission) <= permission.indexOf(payload.data.permission)
+        return permissions.indexOf(permission) <= permissions.indexOf(payload.data.permission)
     }
 }
 
