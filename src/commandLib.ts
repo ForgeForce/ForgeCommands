@@ -65,7 +65,7 @@ export class CommandRegistry {
             return false;
         }
 
-        if (command.hasArgument && !(parsedCommand.arguments?.trim())) {
+        if (command.hasArgument && !parsedCommand.arguments) {
             setFailed("This command requires arguments!");
             await client.rest.issues.createComment({
                 ...context.repo,
@@ -90,7 +90,7 @@ export class CommandRegistry {
             const split = actualComment.split(" ")
             return {
                 name: split[0],
-                arguments: split.length == 1 ? null : split.slice(1).join(" "),
+                arguments: split.length == 1 ? null : split.slice(1).join(" ").trim(),
             }
         }
     }

@@ -9543,7 +9543,6 @@ class CommandRegistry {
         this.commands.set(name, command);
     }
     process() {
-        var _a;
         return __awaiter(this, void 0, void 0, function* () {
             (0, core_1.debug)("Checking if step should run on this event action");
             if (!this.shouldRunForAction()) {
@@ -9566,7 +9565,7 @@ class CommandRegistry {
                 (0, core_1.setFailed)("User does not have permission!");
                 return false;
             }
-            if (command.hasArgument && !((_a = parsedCommand.arguments) === null || _a === void 0 ? void 0 : _a.trim())) {
+            if (command.hasArgument && !parsedCommand.arguments) {
                 (0, core_1.setFailed)("This command requires arguments!");
                 yield client.rest.issues.createComment(Object.assign(Object.assign({}, github_1.context.repo), { issue_number: github_1.context.issue.number, body: "Please provide the arguments to run the command with!" }));
                 return false;
@@ -9583,7 +9582,7 @@ class CommandRegistry {
             const split = actualComment.split(" ");
             return {
                 name: split[0],
-                arguments: split.length == 1 ? null : split.slice(1).join(" "),
+                arguments: split.length == 1 ? null : split.slice(1).join(" ").trim(),
             };
         }
     }
