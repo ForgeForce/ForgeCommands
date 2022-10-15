@@ -9686,11 +9686,12 @@ function registerCommands(registry) {
         return true;
     })));
     registry.register('shipit', new commandLib_1.Command(false, hasPermission('write'), (args, client) => __awaiter(this, void 0, void 0, function* () {
-        if (!(github_1.context.pull_request)) {
+        const response = yield client.rest.pulls.get(Object.assign(Object.assign({}, github_1.context.repo), { pull_number: github_1.context.issue.number })).catch(() => { });
+        const pullRequest = response.data;
+        if (!pullRequest) {
             yield postComment(client, 'This command is only usable on pull requests!');
             return false;
         }
-        const { data: pullRequest } = yield client.rest.pulls.get(Object.assign(Object.assign({}, github_1.context.repo), { pull_number: github_1.context.issue.number }));
         yield client.rest.pulls.merge(Object.assign(Object.assign({}, github_1.context.repo), { pull_number: github_1.context.issue.number, commit_title: pullRequest.title, commit_message: '', sha: pullRequest.head.sha, merge_method: 'squash' }));
         yield postComment(client, ':shipit:');
         return true;

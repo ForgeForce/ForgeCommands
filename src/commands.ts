@@ -87,15 +87,16 @@ export function registerCommands(registry: CommandRegistry) {
     registry.register('shipit', new Command(
         false, hasPermission('write'),
         async (args, client) => {
-            if (!((context as any).pull_request)) {
+            const response = await client.rest.pulls.get({
+                ...context.repo,
+                pull_number: context.issue.number
+            }).catch(() => {})
+            const pullRequest = (response as any).data
+
+            if (!pullRequest) {
                 await postComment(client, 'This command is only usable on pull requests!')
                 return false
             }
-
-            const { data: pullRequest } = await client.rest.pulls.get({
-                ...context.repo,
-                pull_number: context.issue.number
-            })
 
             await client.rest.pulls.merge({
                 ...context.repo,
