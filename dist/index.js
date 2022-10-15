@@ -9638,11 +9638,14 @@ function isInTeam(teamName) {
 }
 function registerCommands(registry) {
     registry.register('assign', new commandLib_1.Command(true, isInTeam('triagers'), (args, client) => __awaiter(this, void 0, void 0, function* () {
-        var _a;
+        var _a, _b, _c;
         const issueNumber = github_1.context.issue.number;
         const issue = yield client.rest.issues.get(Object.assign(Object.assign({}, github_1.context.repo), { issue_number: issueNumber }));
         const author = issue.data.user;
-        const assignees = (_a = issue.data.assignees) === null || _a === void 0 ? void 0 : _a.map((assignee) => assignee.login);
+        let isIssue = typeof github_1.context.issue !== 'undefined' &&
+            typeof github_1.context.pull_request === 'undefined' &&
+            ((_b = (_a = github_1.context.workflow_run) === null || _a === void 0 ? void 0 : _a.pull_requests) === null || _b === void 0 ? void 0 : _b.length) === undefined;
+        const assignees = (_c = issue.data.assignees) === null || _c === void 0 ? void 0 : _c.map((assignee) => assignee.login);
         if (assignees && assignees.length > 0) {
             console.log(`Removing old assignees (${assignees.join(', ')}) from issue #${issueNumber}`);
             yield client.rest.issues.removeAssignees(Object.assign(Object.assign({}, github_1.context.repo), { issue_number: issueNumber, assignees: assignees }));
@@ -9653,8 +9656,15 @@ function registerCommands(registry) {
         if (toAssign.length > 10) {
             toAssign = toAssign.slice(0, 10);
         }
+        if (toAssign.length <= 0) {
+            console.log('No members to assign');
+            return;
+        }
         console.log(`Assigning ${toAssign.join(', ')} to issue #${issueNumber}`);
         yield client.rest.issues.addAssignees(Object.assign(Object.assign({}, github_1.context.repo), { issue_number: issueNumber, assignees: assignees }));
+        if (!isIssue) {
+            yield client.rest.pulls.requestReviewers(Object.assign(Object.assign({}, github_1.context.repo), { pull_number: issueNumber, reviewers: assignees }));
+        }
     })));
 }
 exports.registerCommands = registerCommands;
