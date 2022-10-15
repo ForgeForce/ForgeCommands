@@ -141,7 +141,7 @@ export function registerCommands(registry: CommandRegistry) {
             await client.rest.issues.update({
                 ...context.repo,
                 issue_number: context.issue.number,
-                title: `[${args}.x] ` + (issue as any).title
+                title: `[${args}.x] ` + (context.issue as any).title
             })
             await client.rest.issues.addLabels({
                 ...context.repo,
@@ -162,7 +162,7 @@ export function registerCommands(registry: CommandRegistry) {
             await client.rest.issues.update({
                 ...context.repo,
                 issue_number: context.issue.number,
-                body: (issue as any).title + `\nCloses ${args?.startsWith('#') ? args : '#' + args}`
+                body: (context.issue as any).body + `\nCloses ${args?.startsWith('#') ? args : '#' + args}`
             })
             return true
         }
