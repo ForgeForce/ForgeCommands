@@ -9577,6 +9577,7 @@ class CommandRegistry {
         });
     }
     findCommand(comment) {
+        console.log(`Checking for prefix '${this.prefix}'`);
         if (comment.startsWith(this.prefix)) {
             const actualComment = comment.substring(this.prefix.length);
             const split = actualComment.split(" ");
