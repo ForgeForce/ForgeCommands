@@ -9646,7 +9646,7 @@ function registerCommands(registry) {
             console.log(`Removing old assigness (${assignees.join(', ')}) from issue #${issueNumber}`);
             yield client.rest.issues.removeAssignees(Object.assign(Object.assign({}, github_1.context.repo), { issue_number: issueNumber, assignees: assignees }));
         }
-        var toAssign = yield (0, utils_1.getTeamMembers)(client, github_1.context.repo.owner, args);
+        var toAssign = yield (0, utils_1.getTeamMembers)(client, github_1.context.repo.owner, (0, utils_1.parseTeam)(args));
         toAssign = toAssign.filter((assignee) => assignee != author.login);
         if (toAssign.length > 10) {
             toAssign = toAssign.slice(0, 10);
@@ -9716,7 +9716,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getTeamMembers = exports.getMemberTeams = void 0;
+exports.parseTeam = exports.getTeamMembers = exports.getMemberTeams = void 0;
 const github_1 = __nccwpck_require__(5438);
 const memberTeamsQuery = `query($pg: String, $organization: String!, $userLogins: [String!], $username: String!)  {
     user(login: $username) {
@@ -9771,6 +9771,10 @@ function getTeamMembers(octokit, org, teamName) {
 }
 exports.getTeamMembers = getTeamMembers;
 ;
+function parseTeam(input) {
+    return input.substring(input.indexOf("/") + 1, input.length);
+}
+exports.parseTeam = parseTeam;
 
 
 /***/ }),

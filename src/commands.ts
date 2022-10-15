@@ -1,6 +1,6 @@
 import { Command, CommandRegistry } from "./commandLib";
 import { GitHub } from "@actions/github/lib/utils";
-import { getMemberTeams, getTeamMembers } from "./utils";
+import { getMemberTeams, getTeamMembers, parseTeam } from "./utils";
 import { context } from '@actions/github';
 
 function isInTeam(teamName: string): (client: InstanceType<typeof GitHub>) => Promise<boolean> {
@@ -31,7 +31,7 @@ export function registerCommands(registry: CommandRegistry) {
                 })
             }
             
-            var toAssign = await getTeamMembers(client, context.repo.owner, args!!);
+            var toAssign = await getTeamMembers(client, context.repo.owner, parseTeam(args!!));
             toAssign = toAssign.filter((assignee) => assignee != author.login);
             if (toAssign.length > 10) {
                 toAssign = toAssign.slice(0, 10)

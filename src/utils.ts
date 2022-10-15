@@ -54,3 +54,7 @@ export async function getTeamMembers(octokit: InstanceType<typeof GitHub>, org: 
     return teamMemberRequest.data
         .map((user) => user.login);
 };
+
+export function parseTeam(input: string) {
+    return input.substring(input.indexOf("/") + 1, input.length)
+}
