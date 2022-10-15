@@ -11,7 +11,7 @@ export async function run(): Promise<void> {
     try {
         const registry = new CommandRegistry(
             getInput("prefix", { required: true }).replace("<ws>", " "),
-            getBooleanInput("allow-edits")
+            getInput("allow-edits") == "true"
         );
         registerCommands(registry);
         await registry.process();

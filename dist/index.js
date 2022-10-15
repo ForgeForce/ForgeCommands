@@ -9681,7 +9681,7 @@ const commands_1 = __nccwpck_require__(6695);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const registry = new commandLib_1.CommandRegistry((0, core_1.getInput)("prefix", { required: true }).replace("<ws>", " "), (0, core_1.getBooleanInput)("allow-edits"));
+            const registry = new commandLib_1.CommandRegistry((0, core_1.getInput)("prefix", { required: true }).replace("<ws>", " "), (0, core_1.getInput)("allow-edits") == "true");
             (0, commands_1.registerCommands)(registry);
             yield registry.process();
         }
