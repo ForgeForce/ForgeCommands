@@ -1,0 +1,22 @@
+name: "Forge commands"
+
+description: "Commands for Forge actions"
+
+author: "forgeforce"
+
+branding:
+  icon: "terminal"
+  color: "white"
+
+inputs:
+  github-token:
+    description: The GITHUB_TOKEN secret
+    required: true
+
+  prefix:
+    description: The command prefix
+    required: true
+
+runs:
+  using: "node12"
+  main: "dist/index.js"
