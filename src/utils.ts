@@ -41,7 +41,7 @@ export async function getMemberTeams(octokit: InstanceType<typeof GitHub>, usern
     return teams;
 }
 
-export async function getTeamMembers(octokit: InstanceType<typeof GitHub>, org: string, teamName: string): Promise<Array<String>> {
+export async function getTeamMembers(octokit: InstanceType<typeof GitHub>, org: string, teamName: string): Promise<Array<string>> {
     const teamMemberRequest = await 
         octokit.rest.teams.listMembersInOrg({
                 org,

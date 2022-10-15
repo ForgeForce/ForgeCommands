@@ -9661,10 +9661,14 @@ function registerCommands(registry) {
             return true;
         }
         console.log(`Assigning ${toAssign.join(', ')} to issue #${issueNumber}`);
-        yield client.rest.issues.addAssignees(Object.assign(Object.assign({}, github_1.context.repo), { issue_number: issueNumber, assignees: assignees }));
-        if (!isIssue) {
-            yield client.rest.pulls.requestReviewers(Object.assign(Object.assign({}, github_1.context.repo), { pull_number: issueNumber, reviewers: assignees }));
-        }
+        yield client.rest.issues.addAssignees(Object.assign(Object.assign({}, github_1.context.repo), { issue_number: issueNumber, assignees: toAssign }));
+        // if (!isIssue) {
+        //     await client.rest.pulls.requestReviewers({
+        //         ...context.repo,
+        //         pull_number: issueNumber,
+        //         reviewers: toAssign
+        //     })
+        // }
         return true;
     })));
 }

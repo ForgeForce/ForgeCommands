@@ -51,16 +51,16 @@ export function registerCommands(registry: CommandRegistry) {
             await client.rest.issues.addAssignees({
                 ...context.repo,
                 issue_number: issueNumber,
-                assignees: assignees
+                assignees: toAssign
             })
 
-            if (!isIssue) {
-                await client.rest.pulls.requestReviewers({
-                    ...context.repo,
-                    pull_number: issueNumber,
-                    reviewers: assignees
-                })
-            }
+            // if (!isIssue) {
+            //     await client.rest.pulls.requestReviewers({
+            //         ...context.repo,
+            //         pull_number: issueNumber,
+            //         reviewers: toAssign
+            //     })
+            // }
             return true
         }
     ))
