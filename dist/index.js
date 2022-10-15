@@ -9626,6 +9626,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.registerCommands = void 0;
 const commandLib_1 = __nccwpck_require__(9822);
@@ -9653,15 +9654,12 @@ function hasPermission(permission) {
         });
     };
 }
-function triageTeam() {
-    var _a;
-    return (_a = (0, core_1.getInput)('triage-team')) !== null && _a !== void 0 ? _a : 'triage';
-}
+const triageTeam = (_a = (0, core_1.getInput)('triage-team')) !== null && _a !== void 0 ? _a : 'triage';
 function postComment(client, comment) {
     return client.rest.issues.createComment(Object.assign(Object.assign({}, github_1.context.repo), { issue_number: github_1.context.issue.number, body: comment }));
 }
 function registerCommands(registry) {
-    registry.register('assign', new commandLib_1.Command(true, isInTeam(triageTeam()), (args, client) => __awaiter(this, void 0, void 0, function* () {
+    registry.register('assign', new commandLib_1.Command(true, isInTeam(triageTeam), (args, client) => __awaiter(this, void 0, void 0, function* () {
         var _a;
         const issueNumber = github_1.context.issue.number;
         const issue = yield client.rest.issues.get(Object.assign(Object.assign({}, github_1.context.repo), { issue_number: issueNumber }));
@@ -9694,6 +9692,17 @@ function registerCommands(registry) {
         }
         yield client.rest.pulls.merge(Object.assign(Object.assign({}, github_1.context.repo), { pull_number: github_1.context.issue.number, commit_title: pullRequest.title + ' (#' + github_1.context.issue.number + ')', commit_message: '', sha: pullRequest.head.sha, merge_method: 'squash' }));
         yield postComment(client, ':shipit:');
+        return true;
+    })));
+    registry.register('lock', new commandLib_1.Command(false, isInTeam(triageTeam), (args, client) => __awaiter(this, void 0, void 0, function* () {
+        let reason = 'too heated';
+        if (args == 'spam') {
+            reason = 'spam';
+        }
+        else if (args == 'off-topic') {
+            reason = 'off-topic';
+        }
+        yield client.rest.issues.lock(Object.assign(Object.assign({}, github_1.context.repo), { issue_number: github_1.context.issue.number, lock_reason: reason }));
         return true;
     })));
 }

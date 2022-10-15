@@ -29,9 +29,7 @@ function hasPermission(permission: permission): PermCheck {
     }
 }
 
-function triageTeam(): string {
-    return getInput('triage-team') ?? 'triage'
-}
+const triageTeam = getInput('triage-team') ?? 'triage'
 
 function postComment(client: InstanceType<typeof GitHub>, comment: string): Promise<any> {
     return client.rest.issues.createComment({
@@ -43,7 +41,7 @@ function postComment(client: InstanceType<typeof GitHub>, comment: string): Prom
 
 export function registerCommands(registry: CommandRegistry) {
     registry.register('assign', new Command(
-        true, isInTeam(triageTeam()),
+        true, isInTeam(triageTeam),
         async (args, client) => {
             const issueNumber = context.issue.number;
             const issue = await client.rest.issues.get({
@@ -108,6 +106,25 @@ export function registerCommands(registry: CommandRegistry) {
             })
             await postComment(client, ':shipit:')
 
+            return true
+        }
+    ))
+
+    registry.register('lock', new Command(
+        false, isInTeam(triageTeam),
+        async (args, client) => {
+            let reason = 'too heated'
+            if (args == 'spam') {
+                reason = 'spam'
+            } else if (args == 'off-topic') {
+                reason = 'off-topic'
+            }
+            
+            await client.rest.issues.lock({
+                ...context.repo,
+                issue_number: context.issue.number,
+                lock_reason: (reason as any)
+            })
             return true
         }
     ))
