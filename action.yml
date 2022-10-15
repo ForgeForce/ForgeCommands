@@ -17,6 +17,10 @@ inputs:
     description: The command prefix
     required: true
 
+  allow-edits:
+    description: If edits should be allowed
+    required: false
+
 runs:
   using: "node12"
   main: "dist/index.js"
