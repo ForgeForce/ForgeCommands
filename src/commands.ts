@@ -134,10 +134,14 @@ export function registerCommands(registry: CommandRegistry) {
     registry.registerAliased(new Command(
         true, isInTeam(triageTeam),
         async (args, client) => {
+            const issue = await client.rest.issues.get({
+                ... context.repo,
+                issue_number: context.issue.number
+            })
             await client.rest.issues.update({
                 ...context.repo,
                 issue_number: context.issue.number,
-                title: `[${args}.x] ` + (context.issue as any).title
+                title: `[${args}.x] ` + (issue as any).title
             })
             await client.rest.issues.addLabels({
                 ...context.repo,
@@ -151,10 +155,14 @@ export function registerCommands(registry: CommandRegistry) {
     registry.register('closes', new Command(
         true, isInTeam(triageTeam),
         async (args, client) => {
+            const issue = await client.rest.issues.get({
+                ... context.repo,
+                issue_number: context.issue.number
+            })
             await client.rest.issues.update({
                 ...context.repo,
                 issue_number: context.issue.number,
-                body: (context.issue as any).title + `\nCloses ${args?.startsWith('#') ? args : '#' + args}`
+                body: (issue as any).title + `\nCloses ${args?.startsWith('#') ? args : '#' + args}`
             })
             return true
         }
