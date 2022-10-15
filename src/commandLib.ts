@@ -36,6 +36,12 @@ export class CommandRegistry {
         this.commands.set(name, command);
     }
 
+    public registerAliased(command: Command, ...names: string[]): void {
+        for (const name of names) {
+            this.register(name, command)
+        }
+    }
+
     public async process(): Promise<boolean> {
         debug("Checking if step should run on this event action");
 

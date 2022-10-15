@@ -118,12 +118,43 @@ export function registerCommands(registry: CommandRegistry) {
                 reason = 'spam'
             } else if (args == 'off-topic') {
                 reason = 'off-topic'
+            } else if (args == 'resolved') {
+                reason = 'resolved'
             }
-            
+
             await client.rest.issues.lock({
                 ...context.repo,
                 issue_number: context.issue.number,
                 lock_reason: (reason as any)
+            })
+            return true
+        }
+    ))
+
+    registry.registerAliased(new Command(
+        true, isInTeam(triageTeam),
+        async (args, client) => {
+            await client.rest.issues.update({
+                ...context.repo,
+                issue_number: context.issue.number,
+                title: `[${args}.x] ` + (context.issue as any).title
+            })
+            await client.rest.issues.addLabels({
+                ...context.repo,
+                issue_number: context.issue.number,
+                labels: [args!!]
+            })
+            return true
+        }
+    ), 'mcVersion', 'mc-version')
+
+    registry.register('closes', new Command(
+        true, isInTeam(triageTeam),
+        async (args, client) => {
+            await client.rest.issues.update({
+                ...context.repo,
+                issue_number: context.issue.number,
+                body: (context.issue as any).title + `\nCloses ${args?.startsWith('#') ? args : '#' + args}`
             })
             return true
         }

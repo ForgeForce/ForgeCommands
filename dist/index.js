@@ -9542,6 +9542,11 @@ class CommandRegistry {
     register(name, command) {
         this.commands.set(name, command);
     }
+    registerAliased(command, ...names) {
+        for (const name of names) {
+            this.register(name, command);
+        }
+    }
     process() {
         return __awaiter(this, void 0, void 0, function* () {
             (0, core_1.debug)("Checking if step should run on this event action");
@@ -9702,7 +9707,19 @@ function registerCommands(registry) {
         else if (args == 'off-topic') {
             reason = 'off-topic';
         }
+        else if (args == 'resolved') {
+            reason = 'resolved';
+        }
         yield client.rest.issues.lock(Object.assign(Object.assign({}, github_1.context.repo), { issue_number: github_1.context.issue.number, lock_reason: reason }));
+        return true;
+    })));
+    registry.registerAliased(new commandLib_1.Command(true, isInTeam(triageTeam), (args, client) => __awaiter(this, void 0, void 0, function* () {
+        yield client.rest.issues.update(Object.assign(Object.assign({}, github_1.context.repo), { issue_number: github_1.context.issue.number, title: `[${args}.x] ` + github_1.context.issue.title }));
+        yield client.rest.issues.addLabels(Object.assign(Object.assign({}, github_1.context.repo), { issue_number: github_1.context.issue.number, labels: [args] }));
+        return true;
+    })), 'mcVersion', 'mc-version');
+    registry.register('closes', new commandLib_1.Command(true, isInTeam(triageTeam), (args, client) => __awaiter(this, void 0, void 0, function* () {
+        yield client.rest.issues.update(Object.assign(Object.assign({}, github_1.context.repo), { issue_number: github_1.context.issue.number, body: github_1.context.issue.title + `\nCloses ${(args === null || args === void 0 ? void 0 : args.startsWith('#')) ? args : '#' + args}` }));
         return true;
     })));
 }
