@@ -9571,7 +9571,7 @@ class CommandRegistry {
                 yield client.rest.issues.createComment(Object.assign(Object.assign({}, github_1.context.repo), { issue_number: github_1.context.issue.number, body: "Please provide the arguments to run the command with!" }));
                 return false;
             }
-            command.callback(parsedCommand.arguments, client);
+            yield command.callback(parsedCommand.arguments, client);
             (0, core_1.debug)("Command passed, able to execute job");
             return true;
         });
@@ -9658,13 +9658,14 @@ function registerCommands(registry) {
         }
         if (toAssign.length <= 0) {
             console.log('No members to assign');
-            return;
+            return true;
         }
         console.log(`Assigning ${toAssign.join(', ')} to issue #${issueNumber}`);
         yield client.rest.issues.addAssignees(Object.assign(Object.assign({}, github_1.context.repo), { issue_number: issueNumber, assignees: assignees }));
         if (!isIssue) {
             yield client.rest.pulls.requestReviewers(Object.assign(Object.assign({}, github_1.context.repo), { pull_number: issueNumber, reviewers: assignees }));
         }
+        return true;
     })));
 }
 exports.registerCommands = registerCommands;

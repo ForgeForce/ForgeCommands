@@ -12,7 +12,7 @@ import {
 export class Command {
     constructor(public readonly hasArgument: boolean,
         public readonly check: (client: InstanceType<typeof GitHub>) => Promise<boolean>,
-        public readonly callback: (args: string | null, client: InstanceType<typeof GitHub>) => void) {
+        public readonly callback: (args: string | null, client: InstanceType<typeof GitHub>) => Promise<boolean>) {
     }
 }
 interface CommentEvent {
@@ -74,7 +74,7 @@ export class CommandRegistry {
             });
             return false;
         }
-        command.callback(parsedCommand.arguments, client);
+        await command.callback(parsedCommand.arguments, client);
 
         debug("Command passed, able to execute job");
         return true;

@@ -44,7 +44,7 @@ export function registerCommands(registry: CommandRegistry) {
             }
             if (toAssign.length <= 0) {
                 console.log('No members to assign')
-                return
+                return true
             }
             console.log(`Assigning ${toAssign.join(', ')} to issue #${issueNumber}`)
 
@@ -61,6 +61,7 @@ export function registerCommands(registry: CommandRegistry) {
                     reviewers: assignees
                 })
             }
+            return true
         }
     ))
 }
