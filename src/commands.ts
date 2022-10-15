@@ -91,7 +91,7 @@ export function registerCommands(registry: CommandRegistry) {
                 ...context.repo,
                 pull_number: context.issue.number
             }).catch(() => {})
-            const pullRequest = (response as any).data
+            const pullRequest = !response ? null : (response as any).data
 
             if (!pullRequest) {
                 await postComment(client, 'This command is only usable on pull requests!')

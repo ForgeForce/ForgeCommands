@@ -9687,7 +9687,7 @@ function registerCommands(registry) {
     })));
     registry.register('shipit', new commandLib_1.Command(false, hasPermission('write'), (args, client) => __awaiter(this, void 0, void 0, function* () {
         const response = yield client.rest.pulls.get(Object.assign(Object.assign({}, github_1.context.repo), { pull_number: github_1.context.issue.number })).catch(() => { });
-        const pullRequest = response.data;
+        const pullRequest = !response ? null : response.data;
         if (!pullRequest) {
             yield postComment(client, 'This command is only usable on pull requests!');
             return false;
