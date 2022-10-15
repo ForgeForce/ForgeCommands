@@ -13,8 +13,8 @@ inputs:
     description: The GITHUB_TOKEN secret
     required: true
 
-  prefix:
-    description: The command prefix
+  prefixes:
+    description: The command prefixes
     required: true
 
   allow-edits:

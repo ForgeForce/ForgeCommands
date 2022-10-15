@@ -28,7 +28,7 @@ interface CommentEvent {
 }
 
 export class CommandRegistry {
-    constructor(private readonly prefix: string, private readonly allowEdits: boolean, private commands:  Map<string, Command> = new Map<string, Command>()) {
+    constructor(private readonly prefixes: string[], private readonly allowEdits: boolean, private commands:  Map<string, Command> = new Map<string, Command>()) {
 
     }
 
@@ -90,13 +90,15 @@ export class CommandRegistry {
         name: string,
         arguments: string | null
     } | undefined {
-        console.log(`Checking for prefix '${this.prefix}'`);
-        if (comment.startsWith(this.prefix)) {
-            const actualComment = comment.substring(this.prefix.length)
-            const split = actualComment.split(" ")
-            return {
-                name: split[0],
-                arguments: split.length == 1 ? null : split.slice(1).join(" ").trim(),
+        console.log(`Checking for prefixes '${this.prefixes.join(', ')}'`);
+        for (const prefix of this.prefixes) {
+            if (comment.startsWith(prefix)) {
+                const actualComment = comment.substring(prefix.length)
+                const split = actualComment.split(" ")
+                return {
+                    name: split[0],
+                    arguments: split.length == 1 ? null : split.slice(1).join(" ").trim(),
+                }
             }
         }
     }

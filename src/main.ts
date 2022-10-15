@@ -10,7 +10,7 @@ import { registerCommands } from "./commands";
 export async function run(): Promise<void> {
     try {
         const registry = new CommandRegistry(
-            getInput("prefix", { required: true }).replace("<ws>", " "),
+            getInput("prefixes", { required: true }).split(",").map(e => e.replace("<ws>", " ")),
             getInput("allow-edits") == "true"
         );
         registerCommands(registry);
