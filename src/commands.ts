@@ -22,8 +22,8 @@ export function registerCommands(registry: CommandRegistry) {
             const author = issue.data.user!!;
 
             const assignees = issue.data.assignees?.map((assignee) => assignee.login)
-            if (assignees) {
-                console.log(`Removing old assigness (${assignees.join(', ')}) from issue #${issueNumber}`)
+            if (assignees && assignees.length > 0) {
+                console.log(`Removing old assignees (${assignees.join(', ')}) from issue #${issueNumber}`)
                 await client.rest.issues.removeAssignees({
                     ...context.repo,
                     issue_number: issueNumber,
@@ -31,11 +31,13 @@ export function registerCommands(registry: CommandRegistry) {
                 })
             }
             
+            console.log(`Querying members of team '${parseTeam(args!!)}', organization: ${context.repo.owner}`)
             var toAssign = await getTeamMembers(client, context.repo.owner, parseTeam(args!!));
             toAssign = toAssign.filter((assignee) => assignee != author.login);
             if (toAssign.length > 10) {
                 toAssign = toAssign.slice(0, 10)
             }
+            console.log(`Assigning ${toAssign.join(', ')} to issue #${issueNumber}`)
 
             await client.rest.issues.addAssignees({
                 ...context.repo,

@@ -9643,15 +9643,17 @@ function registerCommands(registry) {
         const issue = yield client.rest.issues.get(Object.assign(Object.assign({}, github_1.context.repo), { issue_number: issueNumber }));
         const author = issue.data.user;
         const assignees = (_a = issue.data.assignees) === null || _a === void 0 ? void 0 : _a.map((assignee) => assignee.login);
-        if (assignees) {
-            console.log(`Removing old assigness (${assignees.join(', ')}) from issue #${issueNumber}`);
+        if (assignees && assignees.length > 0) {
+            console.log(`Removing old assignees (${assignees.join(', ')}) from issue #${issueNumber}`);
             yield client.rest.issues.removeAssignees(Object.assign(Object.assign({}, github_1.context.repo), { issue_number: issueNumber, assignees: assignees }));
         }
+        console.log(`Querying members of team '${(0, utils_1.parseTeam)(args)}', organization: ${github_1.context.repo.owner}`);
         var toAssign = yield (0, utils_1.getTeamMembers)(client, github_1.context.repo.owner, (0, utils_1.parseTeam)(args));
         toAssign = toAssign.filter((assignee) => assignee != author.login);
         if (toAssign.length > 10) {
             toAssign = toAssign.slice(0, 10);
         }
+        console.log(`Assigning ${toAssign.join(', ')} to issue #${issueNumber}`);
         yield client.rest.issues.addAssignees(Object.assign(Object.assign({}, github_1.context.repo), { issue_number: issueNumber, assignees: assignees }));
     })));
 }
