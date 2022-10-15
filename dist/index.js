@@ -9715,13 +9715,14 @@ function registerCommands(registry) {
     })));
     registry.registerAliased(new commandLib_1.Command(true, isInTeam(triageTeam), (args, client) => __awaiter(this, void 0, void 0, function* () {
         const issue = yield client.rest.issues.get(Object.assign(Object.assign({}, github_1.context.repo), { issue_number: github_1.context.issue.number }));
-        yield client.rest.issues.update(Object.assign(Object.assign({}, github_1.context.repo), { issue_number: github_1.context.issue.number, title: `[${args}.x] ` + github_1.context.issue.title }));
+        yield client.rest.issues.update(Object.assign(Object.assign({}, github_1.context.repo), { issue_number: github_1.context.issue.number, title: `[${args}.x] ` + issue.data.title }));
         yield client.rest.issues.addLabels(Object.assign(Object.assign({}, github_1.context.repo), { issue_number: github_1.context.issue.number, labels: [args] }));
         return true;
     })), 'mcVersion', 'mc-version');
     registry.register('closes', new commandLib_1.Command(true, isInTeam(triageTeam), (args, client) => __awaiter(this, void 0, void 0, function* () {
         const issue = yield client.rest.issues.get(Object.assign(Object.assign({}, github_1.context.repo), { issue_number: github_1.context.issue.number }));
-        yield client.rest.issues.update(Object.assign(Object.assign({}, github_1.context.repo), { issue_number: github_1.context.issue.number, body: github_1.context.issue.body + `\nCloses ${(args === null || args === void 0 ? void 0 : args.startsWith('#')) ? args : '#' + args}` }));
+        const body = issue.data.body ? issue.data.body + '\n' : '';
+        yield client.rest.issues.update(Object.assign(Object.assign({}, github_1.context.repo), { issue_number: github_1.context.issue.number, body: body + `Closes ${(args === null || args === void 0 ? void 0 : args.startsWith('#')) ? args : '#' + args}` }));
         return true;
     })));
 }
