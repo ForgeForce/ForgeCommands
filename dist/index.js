@@ -9570,7 +9570,9 @@ class CommandRegistry {
                 yield client.rest.issues.createComment(Object.assign(Object.assign({}, github_1.context.repo), { issue_number: github_1.context.issue.number, body: "Please provide the arguments to run the command with!" }));
                 return false;
             }
-            yield command.callback(parsedCommand.arguments, client);
+            const success = yield command.callback(parsedCommand.arguments, client);
+            const emoji = success ? "rocket" : "confused";
+            yield client.rest.reactions.createForIssueComment(Object.assign(Object.assign({}, github_1.context.repo), { comment_id: comment.id, content: emoji }));
             (0, core_1.debug)("Command passed, able to execute job");
             return true;
         });
@@ -9627,6 +9629,7 @@ exports.registerCommands = void 0;
 const commandLib_1 = __nccwpck_require__(9822);
 const utils_1 = __nccwpck_require__(1314);
 const github_1 = __nccwpck_require__(5438);
+const core_1 = __nccwpck_require__(2186);
 function isInTeam(teamName) {
     return function (client) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -9635,16 +9638,17 @@ function isInTeam(teamName) {
         });
     };
 }
+function triageTeam() {
+    var _a;
+    return (_a = (0, core_1.getInput)('triage-team')) !== null && _a !== void 0 ? _a : 'triage';
+}
 function registerCommands(registry) {
-    registry.register('assign', new commandLib_1.Command(true, isInTeam('triagers'), (args, client) => __awaiter(this, void 0, void 0, function* () {
-        var _a, _b, _c;
+    registry.register('assign', new commandLib_1.Command(true, isInTeam(triageTeam()), (args, client) => __awaiter(this, void 0, void 0, function* () {
+        var _a;
         const issueNumber = github_1.context.issue.number;
         const issue = yield client.rest.issues.get(Object.assign(Object.assign({}, github_1.context.repo), { issue_number: issueNumber }));
         const author = issue.data.user;
-        let isIssue = typeof github_1.context.issue !== 'undefined' &&
-            typeof github_1.context.pull_request === 'undefined' &&
-            ((_b = (_a = github_1.context.workflow_run) === null || _a === void 0 ? void 0 : _a.pull_requests) === null || _b === void 0 ? void 0 : _b.length) === undefined;
-        const assignees = (_c = issue.data.assignees) === null || _c === void 0 ? void 0 : _c.map((assignee) => assignee.login);
+        const assignees = (_a = issue.data.assignees) === null || _a === void 0 ? void 0 : _a.map((assignee) => assignee.login);
         if (assignees && assignees.length > 0) {
             console.log(`Removing old assignees (${assignees.join(', ')}) from issue #${issueNumber}`);
             yield client.rest.issues.removeAssignees(Object.assign(Object.assign({}, github_1.context.repo), { issue_number: issueNumber, assignees: assignees }));
@@ -9661,13 +9665,6 @@ function registerCommands(registry) {
         }
         console.log(`Assigning ${toAssign.join(', ')} to issue #${issueNumber}`);
         yield client.rest.issues.addAssignees(Object.assign(Object.assign({}, github_1.context.repo), { issue_number: issueNumber, assignees: toAssign }));
-        // if (!isIssue) {
-        //     await client.rest.pulls.requestReviewers({
-        //         ...context.repo,
-        //         pull_number: issueNumber,
-        //         reviewers: toAssign
-        //     })
-        // }
         return true;
     })));
 }

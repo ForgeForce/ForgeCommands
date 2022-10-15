@@ -21,6 +21,10 @@ inputs:
     description: If edits should be allowed
     required: false
 
+  triage-team:
+    description: The name of the triage team
+    required: false
+
 runs:
   using: "node12"
   main: "dist/index.js"

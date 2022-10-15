@@ -2,6 +2,7 @@ import { Command, CommandRegistry } from "./commandLib";
 import { GitHub } from "@actions/github/lib/utils";
 import { getMemberTeams, getTeamMembers, parseTeam } from "./utils";
 import { context } from '@actions/github';
+import { getInput } from '@actions/core'
 
 function isInTeam(teamName: string): (client: InstanceType<typeof GitHub>) => Promise<boolean> {
     return async function(client) {
@@ -9,10 +10,13 @@ function isInTeam(teamName: string): (client: InstanceType<typeof GitHub>) => Pr
         return teams.includes(teamName);
     }
 }
+function triageTeam(): string {
+    return getInput('triage-team') ?? 'triage'
+}
 
 export function registerCommands(registry: CommandRegistry) {
     registry.register('assign', new Command(
-        true, isInTeam('triagers'),
+        true, isInTeam(triageTeam()),
         async (args, client) => {
             const issueNumber = context.issue.number;
             const issue = await client.rest.issues.get({
