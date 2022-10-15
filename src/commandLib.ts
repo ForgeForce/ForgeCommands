@@ -49,13 +49,13 @@ export class CommandRegistry {
         const parsedCommand = this.findCommand(comment.body);
         
         if (!parsedCommand) {
-            setFailed("Comment did not contain a command");
+            console.log("Comment did not contain a command");
             return false;
         }
 
         const command = this.commands.get(parsedCommand.name);
         if (!command) {
-            setFailed("Command does not exist");
+            console.log("Command does not exist");
             return false;
         }
         const client = getOctokit(getInput("github-token", { required: true }));

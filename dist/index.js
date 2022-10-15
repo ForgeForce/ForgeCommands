@@ -9534,8 +9534,8 @@ class Command {
 }
 exports.Command = Command;
 class CommandRegistry {
-    constructor(prefix, allowEdits, commands = new Map()) {
-        this.prefix = prefix;
+    constructor(prefixes, allowEdits, commands = new Map()) {
+        this.prefixes = prefixes;
         this.allowEdits = allowEdits;
         this.commands = commands;
     }
@@ -9552,12 +9552,12 @@ class CommandRegistry {
             const comment = github_1.context.payload.comment;
             const parsedCommand = this.findCommand(comment.body);
             if (!parsedCommand) {
-                (0, core_1.setFailed)("Comment did not contain a command");
+                console.log("Comment did not contain a command");
                 return false;
             }
             const command = this.commands.get(parsedCommand.name);
             if (!command) {
-                (0, core_1.setFailed)("Command does not exist");
+                console.log("Command does not exist");
                 return false;
             }
             const client = (0, github_1.getOctokit)((0, core_1.getInput)("github-token", { required: true }));
@@ -9578,14 +9578,16 @@ class CommandRegistry {
         });
     }
     findCommand(comment) {
-        console.log(`Checking for prefix '${this.prefix}'`);
-        if (comment.startsWith(this.prefix)) {
-            const actualComment = comment.substring(this.prefix.length);
-            const split = actualComment.split(" ");
-            return {
-                name: split[0],
-                arguments: split.length == 1 ? null : split.slice(1).join(" ").trim(),
-            };
+        console.log(`Checking for prefixes '${this.prefixes.join(', ')}'`);
+        for (const prefix of this.prefixes) {
+            if (comment.startsWith(prefix)) {
+                const actualComment = comment.substring(prefix.length);
+                const split = actualComment.split(" ");
+                return {
+                    name: split[0],
+                    arguments: split.length == 1 ? null : split.slice(1).join(" ").trim(),
+                };
+            }
         }
     }
     shouldRunForAction() {
@@ -9638,9 +9640,24 @@ function isInTeam(teamName) {
         });
     };
 }
+function hasPermission(permission) {
+    return function (client) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const payload = yield client.rest.repos.getCollaboratorPermissionLevel(Object.assign(Object.assign({}, github_1.context.repo), { username: github_1.context.actor }));
+            if (!payload || !payload.data || !payload.data.permission) {
+                console.log(`No user permission found in payload: ${JSON.stringify(payload, null, 2)}`);
+                return false;
+            }
+            return permission.indexOf(permission) <= permission.indexOf(payload.data.permission);
+        });
+    };
+}
 function triageTeam() {
     var _a;
     return (_a = (0, core_1.getInput)('triage-team')) !== null && _a !== void 0 ? _a : 'triage';
+}
+function postComment(client, comment) {
+    return client.rest.issues.createComment(Object.assign(Object.assign({}, github_1.context.repo), { issue_number: github_1.context.issue.number, body: comment }));
 }
 function registerCommands(registry) {
     registry.register('assign', new commandLib_1.Command(true, isInTeam(triageTeam()), (args, client) => __awaiter(this, void 0, void 0, function* () {
@@ -9665,6 +9682,16 @@ function registerCommands(registry) {
         }
         console.log(`Assigning ${toAssign.join(', ')} to issue #${issueNumber}`);
         yield client.rest.issues.addAssignees(Object.assign(Object.assign({}, github_1.context.repo), { issue_number: issueNumber, assignees: toAssign }));
+        return true;
+    })));
+    registry.register('shipit', new commandLib_1.Command(false, hasPermission('write'), (args, client) => __awaiter(this, void 0, void 0, function* () {
+        if (!(github_1.context.pull_request)) {
+            yield postComment(client, 'This command is only usable on pull requests!');
+            return false;
+        }
+        const { data: pullRequest } = yield client.rest.pulls.get(Object.assign(Object.assign({}, github_1.context.repo), { pull_number: github_1.context.issue.number }));
+        yield client.rest.pulls.merge(Object.assign(Object.assign({}, github_1.context.repo), { pull_number: github_1.context.issue.number, commit_title: pullRequest.title, commit_message: '', sha: pullRequest.head.sha, merge_method: 'squash' }));
+        yield postComment(client, ':shipit:');
         return true;
     })));
 }
@@ -9695,7 +9722,7 @@ const commands_1 = __nccwpck_require__(6695);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const registry = new commandLib_1.CommandRegistry((0, core_1.getInput)("prefix", { required: true }).replace("<ws>", " "), (0, core_1.getInput)("allow-edits") == "true");
+            const registry = new commandLib_1.CommandRegistry((0, core_1.getInput)("prefixes", { required: true }).split(",").map(e => e.replace("<ws>", " ")), (0, core_1.getInput)("allow-edits") == "true");
             (0, commands_1.registerCommands)(registry);
             yield registry.process();
         }
