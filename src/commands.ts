@@ -101,7 +101,7 @@ export function registerCommands(registry: CommandRegistry) {
             await client.rest.pulls.merge({
                 ...context.repo,
                 pull_number: context.issue.number,
-                commit_title: pullRequest.title,
+                commit_title: pullRequest.title + ' (#' + context.issue.number + ')',
                 commit_message: '',
                 sha: pullRequest.head.sha,
                 merge_method: 'squash'

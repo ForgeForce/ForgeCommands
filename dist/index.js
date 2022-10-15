@@ -9692,7 +9692,7 @@ function registerCommands(registry) {
             yield postComment(client, 'This command is only usable on pull requests!');
             return false;
         }
-        yield client.rest.pulls.merge(Object.assign(Object.assign({}, github_1.context.repo), { pull_number: github_1.context.issue.number, commit_title: pullRequest.title, commit_message: '', sha: pullRequest.head.sha, merge_method: 'squash' }));
+        yield client.rest.pulls.merge(Object.assign(Object.assign({}, github_1.context.repo), { pull_number: github_1.context.issue.number, commit_title: pullRequest.title + ' (#' + github_1.context.issue.number + ')', commit_message: '', sha: pullRequest.head.sha, merge_method: 'squash' }));
         yield postComment(client, ':shipit:');
         return true;
     })));
