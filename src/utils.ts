@@ -6,15 +6,15 @@ const memberTeamsQuery = `query($pg: String, $organization: String!, $userLogins
         id
     }
     organization(login: $organization) {
-      teams (first:1, userLogins: $userLogins, after: $pg) { 
-          nodes {
-            name
+        teams (first:1, userLogins: $userLogins, after: $pg) { 
+            nodes {
+                name
+            }
+            pageInfo {
+                hasNextPage
+                endCursor
+            }        
         }
-        pageInfo {
-          hasNextPage
-          endCursor
-        }        
-      }
     }
 }`
 
@@ -43,7 +43,7 @@ export async function getMemberTeams(octokit: InstanceType<typeof GitHub>, usern
 export async function getTeamMembers(octokit: InstanceType<typeof GitHub>, org: string, teamName: string): Promise<Array<string>> {
     const teamMemberRequest = await 
         octokit.rest.teams.listMembersInOrg({
-                org,
+                org: org,
                 team_slug: teamName
     }).catch((err) => {
         const newErr = new Error('Failed to retrieve team members');
@@ -55,5 +55,5 @@ export async function getTeamMembers(octokit: InstanceType<typeof GitHub>, org: 
 };
 
 export function parseTeam(input: string) {
-    return input.substring(input.indexOf("/") + 1, input.length)
+    return input.substring(input.indexOf("/") + 1, input.length);
 }

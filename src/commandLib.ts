@@ -12,7 +12,8 @@ import {
 export class Command {
     constructor(public readonly hasArgument: boolean,
         public readonly check: (client: InstanceType<typeof GitHub>) => Promise<boolean>,
-        public readonly callback: (args: string | null, client: InstanceType<typeof GitHub>) => Promise<boolean>) {
+        public readonly callback: (args: string | null, client: InstanceType<typeof GitHub>) => Promise<boolean>,
+        public readonly runOnEdit: boolean = true) {
     }
 }
 interface CommentEvent {
@@ -44,11 +45,6 @@ export class CommandRegistry {
 
     public async process(): Promise<boolean> {
         debug("Checking if step should run on this event action");
-
-        if (!this.shouldRunForAction()) {
-            return false;
-        }
-
         debug("Getting the comment and checking it for a command");
 
         const comment = context.payload.comment as CommentEvent;
@@ -66,6 +62,10 @@ export class CommandRegistry {
         }
         const client = getOctokit(getInput("github-token", { required: true }));
 
+        if (!this.shouldRunForAction(command)) {
+            return false;
+        }
+
         if (!(await command.check(client))) {
             setFailed("User does not have permission!");
             return false;
@@ -81,12 +81,13 @@ export class CommandRegistry {
             return false;
         }
         const success = await command.callback(parsedCommand.arguments, client);
+
         const emoji = success ? "rocket" : "confused"
         await client.rest.reactions.createForIssueComment({
             ...context.repo,
             comment_id: comment.id,
             content: emoji
-        });
+        }).catch(reason => console.log(`Could not add reaction to comment: ${reason}`));
 
         debug("Command passed, able to execute job");
         return true;
@@ -109,15 +110,14 @@ export class CommandRegistry {
         }
     }
 
-    public shouldRunForAction(): boolean {
+    public shouldRunForAction(command: Command): boolean {
         if (context.payload.action === "created") {
             debug("Comment was created");
-    
             return true;
         }
     
         if (context.payload.action === "edited") {
-            if (this.allowEdits) {
+            if (this.allowEdits || command.runOnEdit) {
                 debug("Comment was edited and allow edits is enabled");
     
                 return true;

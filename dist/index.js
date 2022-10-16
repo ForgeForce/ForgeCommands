@@ -9526,10 +9526,11 @@ exports.CommandRegistry = exports.Command = void 0;
 const github_1 = __nccwpck_require__(5438);
 const core_1 = __nccwpck_require__(2186);
 class Command {
-    constructor(hasArgument, check, callback) {
+    constructor(hasArgument, check, callback, runOnEdit = true) {
         this.hasArgument = hasArgument;
         this.check = check;
         this.callback = callback;
+        this.runOnEdit = runOnEdit;
     }
 }
 exports.Command = Command;
@@ -9550,9 +9551,6 @@ class CommandRegistry {
     process() {
         return __awaiter(this, void 0, void 0, function* () {
             (0, core_1.debug)("Checking if step should run on this event action");
-            if (!this.shouldRunForAction()) {
-                return false;
-            }
             (0, core_1.debug)("Getting the comment and checking it for a command");
             const comment = github_1.context.payload.comment;
             const parsedCommand = this.findCommand(comment.body);
@@ -9566,6 +9564,9 @@ class CommandRegistry {
                 return false;
             }
             const client = (0, github_1.getOctokit)((0, core_1.getInput)("github-token", { required: true }));
+            if (!this.shouldRunForAction(command)) {
+                return false;
+            }
             if (!(yield command.check(client))) {
                 (0, core_1.setFailed)("User does not have permission!");
                 return false;
@@ -9577,7 +9578,7 @@ class CommandRegistry {
             }
             const success = yield command.callback(parsedCommand.arguments, client);
             const emoji = success ? "rocket" : "confused";
-            yield client.rest.reactions.createForIssueComment(Object.assign(Object.assign({}, github_1.context.repo), { comment_id: comment.id, content: emoji }));
+            yield client.rest.reactions.createForIssueComment(Object.assign(Object.assign({}, github_1.context.repo), { comment_id: comment.id, content: emoji })).catch(reason => console.log(`Could not add reaction to comment: ${reason}`));
             (0, core_1.debug)("Command passed, able to execute job");
             return true;
         });
@@ -9595,13 +9596,13 @@ class CommandRegistry {
             }
         }
     }
-    shouldRunForAction() {
+    shouldRunForAction(command) {
         if (github_1.context.payload.action === "created") {
             (0, core_1.debug)("Comment was created");
             return true;
         }
         if (github_1.context.payload.action === "edited") {
-            if (this.allowEdits) {
+            if (this.allowEdits || command.runOnEdit) {
                 (0, core_1.debug)("Comment was edited and allow edits is enabled");
                 return true;
             }
@@ -9795,15 +9796,15 @@ const memberTeamsQuery = `query($pg: String, $organization: String!, $userLogins
         id
     }
     organization(login: $organization) {
-      teams (first:1, userLogins: $userLogins, after: $pg) { 
-          nodes {
-            name
+        teams (first:1, userLogins: $userLogins, after: $pg) { 
+            nodes {
+                name
+            }
+            pageInfo {
+                hasNextPage
+                endCursor
+            }        
         }
-        pageInfo {
-          hasNextPage
-          endCursor
-        }        
-      }
     }
 }`;
 function getMemberTeams(octokit, username) {
@@ -9830,7 +9831,7 @@ exports.getMemberTeams = getMemberTeams;
 function getTeamMembers(octokit, org, teamName) {
     return __awaiter(this, void 0, void 0, function* () {
         const teamMemberRequest = yield octokit.rest.teams.listMembersInOrg({
-            org,
+            org: org,
             team_slug: teamName
         }).catch((err) => {
             const newErr = new Error('Failed to retrieve team members');
