@@ -1,6 +1,7 @@
 # Container image that runs your code
 FROM eclipse-temurin:17
 
+MKDIR /bin/bash
 COPY dist/app.jar /bin/bash/app.jar
 
 COPY run.sh /run.sh
