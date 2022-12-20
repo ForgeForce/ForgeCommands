@@ -9,7 +9,11 @@ outputs:
   time: # id of output
     description: 'The time we greeted you'
 runs:
-  using: 'docker'
-  image: 'Dockerfile'
-  args:
-    - ${{ inputs.who_to_greet }}
+  - using: "composite"
+    steps:
+     - uses: actions/checkout@v3
+     - uses: actions/setup-java@v3
+       with:
+         distribution: 'temurin' # See 'Supported distributions' for available options
+         java-version: '17'
+     - run: java -jar dist/app.jar
