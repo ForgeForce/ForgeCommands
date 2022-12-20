@@ -17,11 +17,11 @@ import java.util.Base64;
 
 public class Main {
     public static void main(String[] args) throws Exception {
-        //System.out.println(Files.readString(Path.of(System.getenv("GITHUB_EVENT_PATH"))));
+        System.out.println(Files.readString(Path.of(System.getenv("GITHUB_EVENT_PATH"))));
 
         System.out.println("\n");
 
-        byte[] pkcs1Encoded = args[1].getBytes(StandardCharsets.UTF_8);
+        byte[] pkcs1Encoded = Base64.getDecoder().decode(args[1].replaceAll("\\s", ""));
 
         AlgorithmIdentifier algId = new AlgorithmIdentifier(PKCSObjectIdentifiers.rsaEncryption, DERNull.INSTANCE);
         PrivateKeyInfo privateKeyInfo = new PrivateKeyInfo(algId, ASN1Sequence.getInstance(pkcs1Encoded));
