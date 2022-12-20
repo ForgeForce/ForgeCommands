@@ -1,21 +1,15 @@
 name: 'Hello World'
 description: 'Greet someone and record the time'
 inputs:
-  who_to_greet:  # id of input
-    description: 'Who to greet'
+  gh_app_key:  # id of input
     required: true
-    default: 'World'
+  gh_app_name:  # id of input
+    required: true
 outputs:
   time: # id of output
     description: 'The time we greeted you'
 runs:
-  using: "composite"
-  steps:
-   - run: ls
-     shell: bash
-   - uses: actions/setup-java@v3
-     with:
-       distribution: 'temurin' # See 'Supported distributions' for available options
-       java-version: '17'
-   - run: java -jar /dist/app.jar
-     shell: bash
+  using: 'docker'
+  image: 'Dockerfile'
+  args:
+    - ${{ inputs.gh_app_key }} ${{ inputs.gh_app_name }}
