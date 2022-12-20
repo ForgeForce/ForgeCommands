@@ -4,7 +4,7 @@ plugins {
 
 jar {
   manifest.attributes([
-          'Main-Class-Name': 'net.minecraftforge.actionable.Main'
+          'Main-Class': 'net.minecraftforge.actionable.Main'
   ])
   destinationDirectory = file('dist')
   archiveFileName = 'app.jar'
