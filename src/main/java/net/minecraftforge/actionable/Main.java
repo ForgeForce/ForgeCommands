@@ -50,7 +50,7 @@ public class Main {
 
         System.out.println("So, the team members are: ");
         for (final var member : team.getMembers()) {
-            System.out.println(member.getName());
+            System.out.println(member.getLogin());
         }
     }
 
