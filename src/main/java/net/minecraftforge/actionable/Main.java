@@ -8,6 +8,7 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.kohsuke.github.GitHubBuilder;
 import org.kohsuke.github.extras.authorization.JWTTokenProvider;
 
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.KeyFactory;
@@ -20,7 +21,7 @@ public class Main {
 
         System.out.println("\n");
 
-        byte[] pkcs1Encoded = Base64.getDecoder().decode(args[1]);
+        byte[] pkcs1Encoded = args[1].getBytes(StandardCharsets.UTF_8);
 
         AlgorithmIdentifier algId = new AlgorithmIdentifier(PKCSObjectIdentifiers.rsaEncryption, DERNull.INSTANCE);
         PrivateKeyInfo privateKeyInfo = new PrivateKeyInfo(algId, ASN1Sequence.getInstance(pkcs1Encoded));
