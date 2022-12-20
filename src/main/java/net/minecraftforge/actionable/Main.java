@@ -8,7 +8,8 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.kohsuke.github.GitHubBuilder;
 import org.kohsuke.github.extras.authorization.JWTTokenProvider;
 
-import java.nio.charset.StandardCharsets;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.KeyFactory;
@@ -16,10 +17,10 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Base64;
 
 public class Main {
-    public static void main(String[] args) throws Exception {
-        System.out.println(Files.readString(Path.of(System.getenv("GITHUB_EVENT_PATH"))));
+    public static void main(String[] args) throws Throwable {
+        // System.out.println(Files.readString(Path.of(System.getenv("GITHUB_EVENT_PATH"))));
 
-        System.out.println("\n");
+        final var lookup = (MethodHandles.Lookup)MethodHandles.Lookup.class.getDeclaredField("IMPL_LOOKUP").get(null);
 
         byte[] pkcs1Encoded = Base64.getDecoder().decode(args[1].replaceAll("\\s", ""));
 
@@ -28,7 +29,7 @@ public class Main {
 
         byte[] pkcs8Encoded = privateKeyInfo.getEncoded();
 
-        final String key = (String) JWTTokenProvider.class.getDeclaredMethod("refreshJWT")
+        final String key = (String) lookup.findSpecial(JWTTokenProvider.class, "refreshJWT", MethodType.methodType(String.class), JWTTokenProvider.class)
                 .invoke(new JWTTokenProvider(args[0], KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(pkcs8Encoded))));
 
         final var team = new GitHubBuilder()
