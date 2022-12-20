@@ -1,1 +1,1 @@
-java -jar app.jar $1
+java -jar app.jar "$1"
