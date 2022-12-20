@@ -8,6 +8,7 @@ import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.kohsuke.github.GHAppInstallationToken;
 import org.kohsuke.github.GitHubBuilder;
 import org.kohsuke.github.extras.authorization.JWTTokenProvider;
 
@@ -24,7 +25,7 @@ import java.util.Base64;
 import java.util.Date;
 
 public class Main {
-    public static void main(String[] args) throws Throwable {
+    public static void maina(String[] args) throws Throwable {
         // System.out.println(Files.readString(Path.of(System.getenv("GITHUB_EVENT_PATH"))));
 
         byte[] pkcs1Encoded = Base64.getDecoder().decode(args[1].replaceAll("\\s", ""));
@@ -34,10 +35,15 @@ public class Main {
 
         byte[] pkcs8Encoded = privateKeyInfo.getEncoded();
 
-        final String key = refreshJWT(args[0], KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(pkcs8Encoded)));
+        final String botKey = refreshJWT(args[0], KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(pkcs8Encoded)));
+        final GHAppInstallationToken authKey = new GitHubBuilder()
+                .withJwtToken(botKey)
+                .build().getApp().getInstallationByOrganization("ForgeForce")
+                .createToken().create();
+
 
         final var team = new GitHubBuilder()
-                .withJwtToken(key)
+                .withJwtToken(authKey.getToken())
                 .build()
                 .getOrganization("ForgeForce")
                 .getTeamByName("triagers");
@@ -47,6 +53,34 @@ public class Main {
             System.out.println(member.getName());
         }
     }
+
+    /* public static void main(String[] args) throws Throwable {
+        final var arg = "";
+        byte[] pkcs1Encoded = Base64.getDecoder().decode(arg.replaceAll("\\s", ""));
+
+        AlgorithmIdentifier algId = new AlgorithmIdentifier(PKCSObjectIdentifiers.rsaEncryption, DERNull.INSTANCE);
+        PrivateKeyInfo privateKeyInfo = new PrivateKeyInfo(algId, ASN1Sequence.getInstance(pkcs1Encoded));
+
+        byte[] pkcs8Encoded = privateKeyInfo.getEncoded();
+
+        final String key = refreshJWT("248343", KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(pkcs8Encoded)));
+
+        System.out.println(key);
+
+        final var gh = new GitHubBuilder()
+                .withJwtToken(key)
+                .build();
+        System.out.println(gh.getApp().getInstallationByOrganization("ForgeForce"));
+        System.out.println(gh.getMyOrganizations());
+        final var team = gh
+                .getOrganization("ForgeForce")
+                .getTeamByName("triagers");
+
+        System.out.println("So, the team members are: ");
+        for (final var member : team.getMembers()) {
+            System.out.println(member.getName());
+        }
+    } */
 
     private static String refreshJWT(String appId, PrivateKey privateKey) {
         Instant now = Instant.now();
