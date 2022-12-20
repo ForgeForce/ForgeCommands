@@ -25,7 +25,7 @@ import java.util.Base64;
 import java.util.Date;
 
 public class Main {
-    public static void maina(String[] args) throws Throwable {
+    public static void main(String[] args) throws Throwable {
         // System.out.println(Files.readString(Path.of(System.getenv("GITHUB_EVENT_PATH"))));
 
         byte[] pkcs1Encoded = Base64.getDecoder().decode(args[1].replaceAll("\\s", ""));
