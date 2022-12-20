@@ -1,5 +1,5 @@
 # Container image that runs your code
-FROM eclipse-temurin:17
+FROM eclipse-temurin:17-alpine
 
 COPY dist/app.jar /app.jar
 
