@@ -10,6 +10,8 @@ import org.kohsuke.github.extras.authorization.JWTTokenProvider;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.KeyFactory;
+import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Base64;
 
 public class Main {
@@ -25,7 +27,8 @@ public class Main {
 
         byte[] pkcs8Encoded = privateKeyInfo.getEncoded();
 
-        final String key = (String) JWTTokenProvider.class.getDeclaredMethod("refreshJWT").invoke(new JWTTokenProvider(args[0], Base64.getEncoder().encodeToString(pkcs8Encoded)));
+        final String key = (String) JWTTokenProvider.class.getDeclaredMethod("refreshJWT")
+                .invoke(new JWTTokenProvider(args[0], KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(pkcs8Encoded))));
 
         final var team = new GitHubBuilder()
                 .withJwtToken(key)
