@@ -1,7 +1,8 @@
 # Container image that runs your code
 FROM eclipse-temurin:17-alpine
 
-COPY dist/app.jar /app.jar
+RUN mkdir /bin/bash
+COPY dist/app.jar /bin/bash/app.jar
 
 COPY run.sh /run.sh
 RUN chmod +x /run.sh
