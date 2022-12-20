@@ -1,1 +1,1 @@
-java -jar ./app.jar $INPUT_WHO_TO_GREET
+sudo java -jar ./app.jar $INPUT_WHO_TO_GREET
