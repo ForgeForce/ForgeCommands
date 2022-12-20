@@ -1,7 +1,9 @@
 # Container image that runs your code
 FROM eclipse-temurin:17
 
-RUN mkdir /opt/app
-COPY dist/app.jar /opt/app
+COPY dist/app.jar /app.jar
 
-CMD ["java", "-jar", "/opt/app/app.jar"]
+COPY run.sh /run.sh
+RUN chmod +x /run
+
+ENTRYPOINT /bin/bash /run-scripts.sh
