@@ -1,1 +1,1 @@
-java -jar ../../app.jar $INPUT_WHO-TO-GREET
+java -jar ../../app.jar ${!INPUT_WHO-TO-GREET}
