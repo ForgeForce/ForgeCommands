@@ -11,6 +11,8 @@ outputs:
 runs:
   using: "composite"
   steps:
+   - run: ls
+     shell: bash
    - uses: actions/setup-java@v3
      with:
        distribution: 'temurin' # See 'Supported distributions' for available options
