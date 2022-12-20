@@ -1,5 +1,5 @@
 # Container image that runs your code
-FROM amazoncorretto:17.0.5-alpine3.16
+FROM amazoncorretto:17.0.5
 
 COPY dist/app.jar /app.jar
 
