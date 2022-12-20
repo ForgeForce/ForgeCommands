@@ -21,7 +21,7 @@ public class Main {
 
         System.out.println("\n");
 
-        byte[] pkcs1Encoded = Base64.getDecoder().decode(args[1]);
+        byte[] pkcs1Encoded = Base64.getDecoder().decode(args[1].replace("\n", ""));
 
         AlgorithmIdentifier algId = new AlgorithmIdentifier(PKCSObjectIdentifiers.rsaEncryption, DERNull.INSTANCE);
         PrivateKeyInfo privateKeyInfo = new PrivateKeyInfo(algId, ASN1Sequence.getInstance(pkcs1Encoded));
