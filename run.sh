@@ -1,1 +1,1 @@
-java -jar ../../app.jar $GH_APP_NAME $GH_APP_KEY
+java -jar ../../app.jar $INPUT_GH_APP_NAME $INPUT_GH_APP_KEY
