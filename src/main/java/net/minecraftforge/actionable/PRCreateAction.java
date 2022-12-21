@@ -3,6 +3,7 @@ package net.minecraftforge.actionable;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectReader;
 import net.minecraftforge.actionable.util.Action;
+import net.minecraftforge.actionable.util.DiffUtils;
 import net.minecraftforge.actionable.util.FunctionalInterfaces;
 import net.minecraftforge.actionable.util.GithubVars;
 import net.minecraftforge.actionable.util.Jsons;
@@ -45,6 +46,15 @@ public class PRCreateAction {
                 GitHubAccessor.addLabel(pullRequest, prVersion);
             }
         });
+        steps.add(() -> {
+            final List<String> newFiles = DiffUtils.detectNewFiles(GitHubAccessor.getDiff(pullRequest).split("\n"));
+
+            if (newFiles.stream().anyMatch(it -> it.contains("/event/") /* Check for new files in an event package */)) {
+                GitHubAccessor.addLabel(pullRequest, "New Event");
+                GitHubAccessor.addLabel(pullRequest, "Feature");
+            }
+        });
+
         steps.add(() -> pullRequest.requestTeamReviewers(List.of(
                 organization.getTeamByName(GithubVars.TRIAGE_TEAM.get())
         )));

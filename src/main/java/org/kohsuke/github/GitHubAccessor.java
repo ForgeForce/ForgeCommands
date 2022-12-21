@@ -69,4 +69,12 @@ public class GitHubAccessor {
             issue.addLabels(label);
         }
     }
+
+    public static String getDiff(GHPullRequest pr) throws IOException {
+        return pr.root()
+                .createRequest()
+                .withUrlPath(pr.getApiRoute())
+                .withHeader("Accept", "application/vnd.github.v3.diff")
+                .fetchStream(input -> new String(input.readAllBytes()));
+    }
 }
