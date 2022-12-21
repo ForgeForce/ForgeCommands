@@ -41,7 +41,14 @@ public class PRCreateAction {
 
         steps.add(() -> addToProject(gitHub, organization, GithubVars.TRIAGE_PROJECT.get(), pullRequest));
 
-        steps.forEach(FunctionalInterfaces::ignoreExceptions);
+        steps.forEach(runnableException -> {
+            try {
+                runnableException.run();
+            } catch (Exception exception) {
+                System.err.println("Encountered exception running PR create actions: " + exception);
+                exception.printStackTrace();
+            }
+        });
     }
 
     private static void addToProject(GitHub gitHub, GHOrganization organization, int projectURL, GHPullRequest pullRequest) throws IOException {
