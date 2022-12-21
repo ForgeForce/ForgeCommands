@@ -53,6 +53,9 @@ public class PRCreateAction {
                 GitHubAccessor.addLabel(pullRequest, "New Event");
                 GitHubAccessor.addLabel(pullRequest, "Feature");
             }
+            if (newFiles.stream().anyMatch(it -> it.contains("/client/") /* Check for new files in a client package in order to add the Rendering label - this isn't perfect, but it works */)) {
+                GitHubAccessor.addLabel(pullRequest, "Rendering");
+            }
         });
 
         steps.add(() -> pullRequest.requestTeamReviewers(List.of(
