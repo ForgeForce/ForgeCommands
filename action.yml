@@ -5,6 +5,9 @@ inputs:
     required: true
   gh_app_name:  # id of input
     required: true
+  command_prefixes:
+    required: true
+    default: '/'
 outputs:
   time: # id of output
     description: 'The time we greeted you'
@@ -12,4 +15,4 @@ runs:
   using: 'docker'
   image: 'Dockerfile'
   args:
-    - ${{ inputs.gh_app_key }} ${{ inputs.gh_app_name }}
+    - ${{ inputs.gh_app_key }} ${{ inputs.gh_app_name }} ${{ inputs.command_prefixes }}

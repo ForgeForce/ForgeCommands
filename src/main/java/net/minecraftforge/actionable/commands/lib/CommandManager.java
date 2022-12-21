@@ -1,11 +1,9 @@
 package net.minecraftforge.actionable.commands.lib;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectReader;
-import com.google.gson.JsonObject;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.ParseResults;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraftforge.actionable.util.Jsons;
 import org.kohsuke.github.GHIssue;
 import org.kohsuke.github.GHIssueComment;
 import org.kohsuke.github.GitHub;
@@ -16,13 +14,13 @@ import java.io.IOException;
 import java.util.Set;
 
 public record CommandManager(Set<String> prefixes, boolean allowEdits, GitHub gitHub, CommandDispatcher<GHCommandContext> dispatcher) {
-    public void run(JsonObject payload) throws IOException {
+    public void run(JsonNode payload) throws IOException {
         final ObjectReader reader = GitHubAccessor.objectReader(gitHub);
 
-        final GHIssue issue = reader.forType(GHIssue.class).readValue(Jsons.toString(payload.get("issue")));
-        final GHIssueComment comment = reader.forType(GHIssueComment.class).readValue(Jsons.toString(payload.get("comment")));
+        final GHIssue issue = reader.forType(GHIssue.class).readValue(payload.get("issue"));
+        final GHIssueComment comment = reader.forType(GHIssueComment.class).readValue(payload.get("comment"));
         GitHubAccessor.wrapUp(comment, issue);
-        final String action = payload.get("action").getAsString();
+        final String action = payload.get("action").asText();
 
         if (!this.shouldRunForEvent(action)) return;
 
