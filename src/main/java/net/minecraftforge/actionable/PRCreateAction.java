@@ -13,6 +13,7 @@ import org.kohsuke.github.GitHub;
 import org.kohsuke.github.GitHubAccessor;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -32,7 +33,7 @@ public class PRCreateAction {
         final GHOrganization organization = gitHub.getOrganization(repository.getOwnerName());
 
         // We split into steps to not crash if someone does one of the steps manually
-        final Set<FunctionalInterfaces.RunnableException> steps = new HashSet<>();
+        final List<FunctionalInterfaces.RunnableException> steps = new ArrayList<>();
 
         steps.add(() -> GitHubAccessor.addLabel(pullRequest, "Triage"));
         steps.add(() -> {
