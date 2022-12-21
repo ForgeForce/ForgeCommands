@@ -48,7 +48,7 @@ public record CommandManager(Set<String> prefixes, boolean allowEdits, GitHub gi
 
             if (e instanceof CommandSyntaxException exception) {
                 //noinspection deprecation
-                ignoreExceptions(() -> issue.comment("@%s, I encountered an exception exception that command: %s".formatted(
+                ignoreExceptions(() -> issue.comment("@%s, I encountered an exception executing that command: %s".formatted(
                         comment.getUserName(), exception.getMessage()
                 )));
             }
