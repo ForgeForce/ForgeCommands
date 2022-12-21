@@ -5,8 +5,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 public class Jsons {
     public static JsonNode at(JsonNode node, String path) {
         final String[] paths = path.split("\\.");
-        for (int i = paths.length - 1; i >= 0; i--) {
-            node = node.get(paths[i]);
+        for (final String s : paths) {
+            node = node.get(s);
         }
         return node;
     }
