@@ -2,8 +2,11 @@ package net.minecraftforge.actionable.commands.lib;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectReader;
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.ParseResults;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.minecraftforge.actionable.util.FunctionalInterfaces;
 import org.kohsuke.github.GHIssue;
 import org.kohsuke.github.GHIssueComment;
 import org.kohsuke.github.GitHub;
@@ -36,14 +39,21 @@ public record CommandManager(Set<String> prefixes, boolean allowEdits, GitHub gi
         }
 
         try {
-            dispatcher.execute(results);
-
-            comment.createReaction(ReactionContent.ROCKET);
+            final int result = dispatcher.execute(results);
+            if (result == Command.SINGLE_SUCCESS)
+                ignoreExceptions(() -> comment.createReaction(ReactionContent.ROCKET));
         } catch (Exception e) {
             System.err.println("Error while executing command: " + command);
             e.printStackTrace();
 
-            comment.createReaction(ReactionContent.CONFUSED);
+            if (e instanceof CommandSyntaxException exception) {
+                //noinspection deprecation
+                ignoreExceptions(() -> issue.comment("@%s, I encountered an exception exception that command: %s".formatted(
+                        comment.getUserName(), exception.getMessage()
+                )));
+            }
+
+            ignoreExceptions(() -> comment.createReaction(ReactionContent.CONFUSED));
         }
     }
 
@@ -78,4 +88,9 @@ public record CommandManager(Set<String> prefixes, boolean allowEdits, GitHub gi
         return null;
     }
 
+    private static void ignoreExceptions(FunctionalInterfaces.RunnableException runnable) {
+        try {
+            runnable.run();
+        } catch (IOException ignored) {}
+    }
 }

@@ -47,9 +47,13 @@ public class Main {
         }
 
         final CommandDispatcher<GHCommandContext> dispatcher = new CommandDispatcher<>();
-        Commands.register(dispatcher);
+        Commands.register(gh, dispatcher);
 
-        new CommandManager(GithubVars.COMMAND_PREFIXES.get(), true, gh, dispatcher).run(payload);
+        new CommandManager(
+                GithubVars.COMMAND_PREFIXES.get(),
+                GithubVars.ALLOW_COMMANDS_IN_EDITS.get(),
+                gh, dispatcher
+        ).run(payload);
     }
 
     private static GitHub buildApi() throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
