@@ -35,7 +35,7 @@ public class ManagementCommands {
 
         dispatcher.register(literal("move")
                 .requires(canManage.and(it -> !it.issue().isPullRequest()))
-                .then(argument("repo", RepoArgumentType.repo(gh, GithubVars.REPOSITORY_OWNER.get())))
+                .then(argument("repo", RepoArgumentType.repo(gh, GithubVars.REPOSITORY_OWNER.get()))
                         .executes(wrap(ctx -> {
                             final GHRepository repo = ctx.getArgument("repo", GHRepository.class);
                             GitHubAccessor.graphQl(
@@ -57,7 +57,7 @@ public class ManagementCommands {
                                         ctx.getSource().issue().getNodeId()
                                     )
                             );
-                        })));
+                    }))));
 
         dispatcher.register(literal("shipit")
                 .requires(hasPermission(GHPermissionType.WRITE).and(ctx -> ctx.issue().isPullRequest()))

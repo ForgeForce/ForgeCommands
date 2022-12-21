@@ -4,7 +4,6 @@ import com.mojang.brigadier.CommandDispatcher;
 import net.minecraftforge.actionable.commands.lib.GHCommandContext;
 import net.minecraftforge.actionable.util.FunctionalInterfaces;
 import net.minecraftforge.actionable.util.GithubVars;
-import net.minecraftforge.actionable.util.Permission;
 import org.kohsuke.github.GHPermissionType;
 import org.kohsuke.github.GitHub;
 
