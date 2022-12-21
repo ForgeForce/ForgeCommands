@@ -29,6 +29,12 @@ public class FunctionalInterfaces {
         };
     }
 
+    public static void ignoreExceptions(RunnableException runnable) {
+        try {
+            runnable.run();
+        } catch (IOException ignored) {}
+    }
+
     public interface ConsException<T> {
         void accept(T t) throws Exception;
     }

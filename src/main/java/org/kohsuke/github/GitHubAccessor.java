@@ -1,5 +1,6 @@
 package org.kohsuke.github;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectReader;
 import net.minecraftforge.actionable.util.ReportedContentClassifiers;
 
@@ -12,6 +13,10 @@ public class GitHubAccessor {
 
     public static void wrapUp(GHIssueComment comment, GHIssue owner) {
         comment.wrapUp(owner);
+    }
+
+    public static void wrapUp(GHPullRequest pr, GHRepository repository) {
+        pr.wrapUp(repository);
     }
 
     public static void lock(GHIssue issue, LockReason reason) throws IOException {
@@ -30,13 +35,13 @@ public class GitHubAccessor {
                 .send();
     }
 
-    public static void graphQl(GitHub gitHub, String query) throws IOException {
-        gitHub.createRequest()
+    public static JsonNode graphQl(GitHub gitHub, String query, Object... args) throws IOException {
+        return gitHub.createRequest()
                 .method("POST")
                 .inBody()
-                .with("query", query)
+                .with("query", query.formatted(args))
                 .withUrlPath("/graphql")
-                .send();
+                .fetch(JsonNode.class);
     }
 
     public static void minimize(GHIssueComment comment, ReportedContentClassifiers reason) throws IOException {
@@ -51,5 +56,17 @@ public class GitHubAccessor {
                 """.formatted(
                 reason.name(), comment.getNodeId()
         ));
+    }
+
+    public static void removeLabel(GHIssue issue, String label) throws IOException {
+        if (issue.getLabels().stream().anyMatch(it -> it.getName().equals(label))) {
+            issue.removeLabel(label);
+        }
+    }
+
+    public static void addLabel(GHIssue issue, String label) throws IOException {
+        if (issue.getLabels().stream().noneMatch(it -> it.getName().equals(label))) {
+            issue.addLabels(label);
+        }
     }
 }

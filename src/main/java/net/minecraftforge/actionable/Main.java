@@ -8,7 +8,6 @@ import net.minecraftforge.actionable.commands.lib.CommandManager;
 import net.minecraftforge.actionable.commands.lib.GHCommandContext;
 import net.minecraftforge.actionable.util.AuthUtil;
 import net.minecraftforge.actionable.util.GithubVars;
-import org.kohsuke.github.GHTeam;
 import org.kohsuke.github.GitHub;
 import org.kohsuke.github.GitHubBuilder;
 import org.kohsuke.github.authorization.AuthorizationProvider;
@@ -28,23 +27,14 @@ public class Main {
     public static void main(String[] args) throws Throwable {
         switch (GithubVars.EVENT.get()) {
             case ISSUE_COMMENT -> runCommand();
+            case PULL_REQUEST -> PRCreateAction.run(Main::buildApi, payload());
         }
     }
 
     private static void runCommand() throws Throwable {
-        final JsonNode payload;
-        try (final InputStream in = Files.newInputStream(Path.of(GithubVars.EVENT_PATH.get()))) {
-            payload = new ObjectMapper().readTree(in);
-        }
+        final JsonNode payload = payload();
 
         final GitHub gh = buildApi();
-        final GHTeam team = gh.getOrganization("ForgeForce")
-                .getTeamByName("triagers");
-
-        System.out.println("So, the team members are: ");
-        for (final var member : team.getMembers()) {
-            System.out.println(member.getLogin());
-        }
 
         final CommandDispatcher<GHCommandContext> dispatcher = new CommandDispatcher<>();
         Commands.register(gh, dispatcher);
@@ -67,5 +57,15 @@ public class Main {
         return new GitHubBuilder()
                 .withAuthorizationProvider(authorizationProvider)
                 .build();
+    }
+
+    private static JsonNode payload() throws IOException {
+        try (final InputStream in = Files.newInputStream(Path.of(GithubVars.EVENT_PATH.get()))) {
+            return new ObjectMapper().readTree(in);
+        }
+    }
+
+    public interface GitHubGetter {
+        GitHub get() throws IOException, NoSuchAlgorithmException, InvalidKeySpecException;
     }
 }

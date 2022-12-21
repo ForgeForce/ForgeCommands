@@ -11,6 +11,8 @@ inputs:
     default: 'false'
   triage_team:
     default: 'triage'
+  triage_project:
+    default: 'dummy'
 
 outputs:
   time: # id of output
