@@ -42,7 +42,7 @@ public class GitHubAccessor {
     public static void minimize(GHIssueComment comment, ReportedContentClassifiers reason) throws IOException {
         graphQl(comment.root(), """
              mutation {
-                minimizeComment(input: {classifier: "%s", subjectId: "%s"}) {
+                minimizeComment(input: {classifier: %s, subjectId: "%s"}) {
                   minimizedComment {
                     isMinimized
                   }
