@@ -44,7 +44,8 @@ public record CommandManager(Set<String> prefixes, boolean allowEdits, GitHub gi
             if (result == Command.SINGLE_SUCCESS) {
                 ignoreExceptions(() -> comment.createReaction(ReactionContent.ROCKET));
                 if (command.commentOnlyCommand()) {
-                    ignoreExceptions(() -> GitHubAccessor.minimize(comment, ReportedContentClassifiers.RESOLVED));
+                    System.out.println("Attempted to hide comment!");
+                    GitHubAccessor.minimize(comment, ReportedContentClassifiers.RESOLVED);
                 }
             }
         } catch (Exception e) {
