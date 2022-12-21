@@ -38,12 +38,12 @@ public record CommandManager(Set<String> prefixes, boolean allowEdits, GitHub gi
         try {
             dispatcher.execute(results);
 
-            issue.createReaction(ReactionContent.ROCKET);
+            comment.createReaction(ReactionContent.ROCKET);
         } catch (Exception e) {
             System.err.println("Error while executing command: " + command);
             e.printStackTrace();
 
-            issue.createReaction(ReactionContent.CONFUSED);
+            comment.createReaction(ReactionContent.CONFUSED);
         }
     }
 
