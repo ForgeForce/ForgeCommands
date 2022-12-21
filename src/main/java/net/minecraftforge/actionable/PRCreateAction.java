@@ -35,6 +35,15 @@ public class PRCreateAction {
         final Set<FunctionalInterfaces.RunnableException> steps = new HashSet<>();
 
         steps.add(() -> GitHubAccessor.addLabel(pullRequest, "Triage"));
+        steps.add(() -> {
+            final String prTitle = pullRequest.getTitle();
+            if (prTitle.startsWith("[") && prTitle.contains("]")) {
+                final String[] prFullVersion = prTitle.substring(1, prTitle.indexOf("]")).split("\\.");
+                if (prFullVersion.length < 2) return;
+                final String prVersion = prFullVersion[0] + "." + prFullVersion[1];
+                GitHubAccessor.addLabel(pullRequest, prVersion);
+            }
+        });
         steps.add(() -> pullRequest.requestTeamReviewers(List.of(
                 organization.getTeamByName(GithubVars.TRIAGE_TEAM.get())
         )));
@@ -45,7 +54,7 @@ public class PRCreateAction {
             try {
                 runnableException.run();
             } catch (Exception exception) {
-                System.err.println("Encountered exception running PR create actions: " + exception);
+                System.err.println("Encountered exception running PR create action step: " + exception);
                 exception.printStackTrace();
             }
         });
