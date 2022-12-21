@@ -1,6 +1,7 @@
 package org.kohsuke.github;
 
 import com.fasterxml.jackson.databind.ObjectReader;
+import net.minecraftforge.actionable.util.ReportedContentClassifiers;
 
 import java.io.IOException;
 
@@ -36,5 +37,19 @@ public class GitHubAccessor {
                 .with("query", query)
                 .withUrlPath("/graphql")
                 .send();
+    }
+
+    public static void minimize(GHIssueComment comment, ReportedContentClassifiers reason) throws IOException {
+        graphQl(comment.root(), """
+             mutation {
+                minimizeComment(input: {classifier: "%s", subjectId: "%s"}) {
+                  minimizedComment {
+                    isMinimized
+                  }
+                }
+              }
+                """.formatted(
+                reason.name(), comment.getNodeId()
+        ));
     }
 }

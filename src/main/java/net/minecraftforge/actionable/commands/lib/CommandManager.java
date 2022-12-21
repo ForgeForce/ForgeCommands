@@ -7,6 +7,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraftforge.actionable.util.FunctionalInterfaces;
+import net.minecraftforge.actionable.util.ReportedContentClassifiers;
 import org.kohsuke.github.GHIssue;
 import org.kohsuke.github.GHIssueComment;
 import org.kohsuke.github.GitHub;
@@ -27,11 +28,11 @@ public record CommandManager(Set<String> prefixes, boolean allowEdits, GitHub gi
 
         if (!this.shouldRunForEvent(action)) return;
 
-        final String command = findCommand(comment.getBody());
+        final CommandData command = findCommand(comment.getBody());
         if (command == null) return;
 
         final GHCommandContext ctx = new GHCommandContext(gitHub, comment, issue, payload);
-        final ParseResults<GHCommandContext> results = dispatcher.parse(command, ctx);
+        final ParseResults<GHCommandContext> results = dispatcher.parse(command.command(), ctx);
 
         // If the command does not fully parse, then return
         if (results.getReader().getRemainingLength() > 0) {
@@ -40,8 +41,12 @@ public record CommandManager(Set<String> prefixes, boolean allowEdits, GitHub gi
 
         try {
             final int result = dispatcher.execute(results);
-            if (result == Command.SINGLE_SUCCESS)
+            if (result == Command.SINGLE_SUCCESS) {
                 ignoreExceptions(() -> comment.createReaction(ReactionContent.ROCKET));
+                if (command.commentOnlyCommand()) {
+                    ignoreExceptions(() -> GitHubAccessor.minimize(comment, ReportedContentClassifiers.RESOLVED));
+                }
+            }
         } catch (Exception e) {
             System.err.println("Error while executing command: " + command);
             e.printStackTrace();
@@ -65,12 +70,14 @@ public record CommandManager(Set<String> prefixes, boolean allowEdits, GitHub gi
         return false;
     }
 
-    public String findCommand(String comment) {
+    public CommandData findCommand(String comment) {
+        boolean commentOnlyCommand = false;
+        String command = null;
         for (final var prefix : this.prefixes) {
-            String command = null;
             if (comment.startsWith(prefix)) {
                 // If at the start, consider the entire comment a command
                 command = comment.substring(prefix.length());
+                commentOnlyCommand = true;
             } else if (comment.contains(prefix)) {
                 final var index = comment.indexOf(prefix);
                 // If anywhere else, consider the line a command
@@ -82,11 +89,15 @@ public record CommandManager(Set<String> prefixes, boolean allowEdits, GitHub gi
                 }
             }
 
-            return command;
+            if (command != null) {
+                return new CommandData(commentOnlyCommand, command);
+            }
         }
 
         return null;
     }
+
+    public record CommandData(boolean commentOnlyCommand, String command) {}
 
     private static void ignoreExceptions(FunctionalInterfaces.RunnableException runnable) {
         try {

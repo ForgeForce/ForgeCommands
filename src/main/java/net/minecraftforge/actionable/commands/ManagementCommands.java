@@ -33,7 +33,7 @@ public class ManagementCommands {
                 .then(argument("reason", EnumArgumentType.lowerCaseEnum(StringArgumentType.greedyString(), LockReason.class, Map.of("too heated", LockReason.TOO_HEATED, "off topic", LockReason.OFF_TOPIC)))
                         .executes(wrap(ctx -> GitHubAccessor.lock(ctx.getSource().issue(), ctx.getArgument("reason", LockReason.class))))));
 
-        dispatcher.register(literal("move")
+        final var moveCommand = dispatcher.register(literal("move")
                 .requires(canManage.and(it -> !it.issue().isPullRequest()))
                 .then(argument("repo", RepoArgumentType.repo(gh, GithubVars.REPOSITORY_OWNER.get()))
                         .executes(wrap(ctx -> {
@@ -58,6 +58,9 @@ public class ManagementCommands {
                                     )
                             );
                     }))));
+        dispatcher.register(literal("transfer")
+                .requires(canManage.and(it -> !it.issue().isPullRequest()))
+                .redirect(moveCommand));
 
         dispatcher.register(literal("shipit")
                 .requires(hasPermission(GHPermissionType.WRITE).and(ctx -> ctx.issue().isPullRequest()))
