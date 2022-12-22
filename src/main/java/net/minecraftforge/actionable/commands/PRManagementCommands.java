@@ -47,7 +47,10 @@ public class PRManagementCommands {
                         }))));
 
         dispatcher.register(literal("assign")
-                .requires(canManage)
+                .requires(((Predicate<GHCommandContext>) it -> {
+                    System.out.println("Hello there, " + canManage.test(it));
+                    return true;
+                }).and(canManage))
                 .then(argument("team", StringArgumentType.word())
                         .executes(wrap(ctx -> {
                             final GHIssue issue = ctx.getSource().issue();
