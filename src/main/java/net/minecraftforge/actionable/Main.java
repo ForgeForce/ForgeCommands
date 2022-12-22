@@ -8,6 +8,7 @@ import net.minecraftforge.actionable.commands.lib.CommandManager;
 import net.minecraftforge.actionable.commands.lib.GHCommandContext;
 import net.minecraftforge.actionable.util.AuthUtil;
 import net.minecraftforge.actionable.util.GithubVars;
+import org.kohsuke.github.GHOrganization;
 import org.kohsuke.github.GitHub;
 import org.kohsuke.github.GitHubBuilder;
 import org.kohsuke.github.authorization.AuthorizationProvider;
@@ -36,6 +37,10 @@ public class Main {
         final JsonNode payload = payload();
 
         final GitHub gh = buildApi();
+        final GHOrganization org = gh.getOrganization(GithubVars.REPOSITORY_OWNER.get());
+        System.out.println(org);
+        System.out.println(GithubVars.TRIAGE_TEAM.get());
+        System.out.println(org.getTeamBySlug(GithubVars.TRIAGE_TEAM.get()));
 
         final CommandDispatcher<GHCommandContext> dispatcher = new CommandDispatcher<>();
         Commands.register(gh, dispatcher);

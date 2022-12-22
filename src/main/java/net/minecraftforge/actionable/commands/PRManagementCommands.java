@@ -66,7 +66,7 @@ public class PRManagementCommands {
     }
 
     private static String parseTeam(String input) {
-        return input.substring(input.indexOf("/") + 1).toLowerCase(Locale.ROOT);
+        return input.substring(input.lastIndexOf("/")).toLowerCase(Locale.ROOT);
     }
 
 }
