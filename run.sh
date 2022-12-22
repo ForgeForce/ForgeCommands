@@ -1,1 +1,1 @@
-java -jar ../../app.jar
+java --add-opens java.base/java.net=ALL-UNNAMED -jar ../../app.jar
