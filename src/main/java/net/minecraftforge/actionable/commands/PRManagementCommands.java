@@ -53,11 +53,15 @@ public class PRManagementCommands {
                 }).and(canManage))
                 .then(argument("team", StringArgumentType.word())
                         .executes(wrap(ctx -> {
+                            System.out.println("Sup?");
+
                             final GHIssue issue = ctx.getSource().issue();
                             final GHUser author = issue.getUser();
                             final GHTeam team = ctx.getSource().gitHub()
                                     .getOrganization(GithubVars.REPOSITORY_OWNER.get())
                                     .getTeamBySlug(parseTeam(StringArgumentType.getString(ctx, "team")));
+
+                            System.out.println("Team to assign: " + team);
 
                             // We don't want to assign the PR author to their own PR
                             issue.setAssignees(team.getMembers().stream()
