@@ -36,7 +36,7 @@ public class PRManagementCommands {
 
         dispatcher.register(literal("closes")
                 .requires(canManage.and(it -> it.issue().isPullRequest()))
-                .then(argument("issue", StringArgumentType.word())
+                .then(argument("issue", StringArgumentType.greedyString())
                         .executes(wrap(ctx -> {
                             final String body = ctx.getSource().issue().getBody();
                             final String bodyN = body == null || body.isBlank() ? "" : body + "\n";
@@ -51,7 +51,7 @@ public class PRManagementCommands {
                     System.out.println("Hello there, " + canManage.test(it));
                     return true;
                 }).and(canManage))
-                .then(argument("team", StringArgumentType.word())
+                .then(argument("team", StringArgumentType.greedyString())
                         .executes(wrap(ctx -> {
                             System.out.println("Sup?");
 
