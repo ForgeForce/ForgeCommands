@@ -40,7 +40,7 @@ public class PRManagementCommands {
                         .executes(wrap(ctx -> {
                             final String body = ctx.getSource().issue().getBody();
                             final String bodyN = body == null || body.isBlank() ? "" : body + "\n";
-                            final String toClose = StringArgumentType.getString(ctx, "issue");
+                            final String toClose = StringArgumentType.getString(ctx, "issue").trim();
                             ctx.getSource().issue().setBody(
                                     bodyN + (toClose.startsWith("#") ? toClose : "#" + toClose)
                             );
@@ -59,7 +59,7 @@ public class PRManagementCommands {
                             final GHUser author = issue.getUser();
                             final GHTeam team = ctx.getSource().gitHub()
                                     .getOrganization(GithubVars.REPOSITORY_OWNER.get())
-                                    .getTeamBySlug(parseTeam(StringArgumentType.getString(ctx, "team")));
+                                    .getTeamBySlug(parseTeam(StringArgumentType.getString(ctx, "team").trim()));
 
                             System.out.println("Team to assign: " + team);
 
