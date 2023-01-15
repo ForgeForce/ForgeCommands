@@ -7,6 +7,7 @@ import net.minecraftforge.actionable.util.Jsons;
 import net.minecraftforge.actionable.util.Label;
 import net.minecraftforge.actionable.util.RepoConfig;
 import net.minecraftforge.actionable.util.enums.Action;
+import org.jetbrains.annotations.Nullable;
 import org.kohsuke.github.GHIssue;
 import org.kohsuke.github.GHOrganization;
 import org.kohsuke.github.GHPullRequest;
@@ -19,6 +20,7 @@ import org.kohsuke.github.GitHubAccessor;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 public class PRHandler extends ByActionEventHandler<PRHandler.Payload> {
@@ -85,19 +87,31 @@ public class PRHandler extends ByActionEventHandler<PRHandler.Payload> {
 
         steps.add(() -> Label.TRIAGE.add(pullRequest));
         steps.add(() -> {
-            final String prTitle = pullRequest.getTitle();
-            if (prTitle.startsWith("[") && prTitle.contains("]")) {
-                final String[] prFullVersion = prTitle.substring(1, prTitle.indexOf("]")).split("\\.");
-                if (prFullVersion.length < 2) return;
-                final String prVersion = prFullVersion[0] + "." + prFullVersion[1];
-                GitHubAccessor.addLabel(pullRequest, prVersion);
-
-                final String name = RepoConfig.INSTANCE.labels().getOrDefault(Label.LATEST.getId(), "");
-                if (!name.isBlank() && !name.equals(prVersion)) {
-                    Label.LTS_BACKPORT.add(pullRequest);
+            final String prVersion = getPRVersion(pullRequest);
+            if (prVersion != null) {
+                final String latestLabel = RepoConfig.INSTANCE.labels().get(Label.LATEST.getId());
+                if (latestLabel != null) {
+                    if (!latestLabel.equals(prVersion)) {
+                        Label.LTS_BACKPORT.addAndIgnore(pullRequest);
+                    }
+                } else if (payload.repository.getDefaultBranch() != null) {
+                    // If there's no latest label configured, assume that everything which ISN'T targeted to the default branch is an LTS Backport
+                    final String latest = getMajorVersionFrom(payload.repository.getDefaultBranch());
+                    if (latest != null && !latest.equals(prVersion)) {
+                        Label.LTS_BACKPORT.addAndIgnore(pullRequest);
+                    }
                 }
+                GitHubAccessor.addLabel(pullRequest, prVersion);
             }
         });
+
+        steps.add(() -> {
+            final String between = getBetweenAtStart(pullRequest.getTitle(), '[', ']');
+            if (between != null && between.toLowerCase(Locale.ROOT).contains("rfc")) {
+                Label.RFC.add(pullRequest);
+            }
+        });
+
         steps.add(() -> {
             final List<String> newFiles = DiffUtils.detectNewFiles(GitHubAccessor.getDiff(pullRequest).split("\n"));
 
@@ -105,9 +119,13 @@ public class PRHandler extends ByActionEventHandler<PRHandler.Payload> {
                 Label.FEATURE.addAndIgnore(pullRequest);
                 Label.NEW_EVENT.addAndIgnore(pullRequest);
             }
-            if (newFiles.stream().anyMatch(it -> it.contains("/client/") /* Check for new files in a client package in order to add the Rendering label - this isn't perfect, but it works */)) {
+
+            /*
+            Removed for now: not everything in the client package is related to rendering
+            if (newFiles.stream().anyMatch(it -> it.contains("/client/"))) {
                 Label.RENDERING.addAndIgnore(pullRequest);
             }
+            */
         });
 
         if (RepoConfig.INSTANCE.triage() != null) {
@@ -151,5 +169,35 @@ public class PRHandler extends ByActionEventHandler<PRHandler.Payload> {
             }""",
             projectId, pullRequest.getNodeId()
         );
+    }
+
+    @Nullable
+    private static String getPRVersion(GHPullRequest pullRequest) {
+        final String prTitle = pullRequest.getTitle();
+        final String[] prFullVersion;
+        if (prTitle.startsWith("[") && prTitle.contains("]")) {
+            prFullVersion = prTitle.substring(1, prTitle.indexOf("]")).split("\\.");
+        } else {
+            prFullVersion = pullRequest.getBase().getRef().split("\\.");
+        }
+        if (prFullVersion.length >= 2) {
+            return prFullVersion[0] + "." + prFullVersion[1];
+        }
+        return null;
+    }
+
+    @Nullable
+    private static String getMajorVersionFrom(String version) {
+        final String[] spl = version.split("\\.");
+        if (spl.length >= 2) return spl[0] + spl[1];
+        return null;
+    }
+
+    @Nullable
+    private static String getBetweenAtStart(String str, char start, char end) {
+        if (!str.startsWith(Character.toString(start))) return null;
+        final int endIdx = str.indexOf(end);
+        if (endIdx < 0) return null;
+        return str.substring(1, endIdx);
     }
 }
