@@ -7,6 +7,8 @@ inputs:
     required: true
   config_directory:
     required: true
+  mode:
+    default: 'normal'
 
 outputs:
   time: # id of output

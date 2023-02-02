@@ -1,5 +1,9 @@
 package net.minecraftforge.actionable.util;
 
+import net.minecraftforge.actionable.Main;
+
+import java.io.File;
+import java.util.Locale;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -9,8 +13,10 @@ public class GithubVars {
     public static final Var<String> REPOSITORY_OWNER = var(Type.GITHUB, "REPOSITORY_OWNER");
     public static final Var<String> EVENT_PATH = var(Type.GITHUB, "EVENT_PATH");
     public static final Var<String> REF = var(Type.GITHUB, "REF");
+    public static final Var<String> SHA = var(Type.GITHUB, "SHA");
     public static final Var<String> WORKFLOW = var(Type.GITHUB, "WORKFLOW");
     public static final Var<GitHubEvent> EVENT = new Var<>(Type.GITHUB, "EVENT_NAME", it -> GitHubEvent.BY_ID.getOrDefault(it, GitHubEvent.UNKNOWN));
+    public static final Var<File> WORKSPACE = new Var<>(Type.GITHUB, "WORKSPACE", File::new);
 
     public static final Var<String> GH_APP_KEY = var(Type.INPUT, "GH_APP_KEY");
     public static final Var<String> GH_APP_NAME = var(Type.INPUT, "GH_APP_NAME");
@@ -19,6 +25,7 @@ public class GithubVars {
         final String[] dirAndBranch = repoAndDirBranch[1].split("@");
         return new RepoConfig.ConfigLocation(repoAndDirBranch[0], dirAndBranch[0], dirAndBranch[1]);
     });
+    public static final Var<Main.Mode> MODE = new Var<>(Type.INPUT, "MODE", s -> Main.Mode.valueOf(s.toUpperCase(Locale.ROOT)));
 
     private static Var<String> var(Type type, String key) {
         return new Var<>(type, key, Function.identity());
@@ -43,5 +50,4 @@ public class GithubVars {
         INPUT,
         GITHUB
     }
-
 }

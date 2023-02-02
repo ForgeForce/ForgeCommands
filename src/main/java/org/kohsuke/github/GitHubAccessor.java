@@ -32,6 +32,10 @@ public class GitHubAccessor {
         issue.wrap(repository);
     }
 
+    public static void wrapUp(GHCommit commit, GHRepository repository) {
+        commit.wrapUp(repository);
+    }
+
     public static void lock(GHIssue issue, LockReason reason) throws IOException {
         issue.root().createRequest().method("PUT").withUrlPath(issue.getIssuesApiRoute() + "/lock")
                 .inBody().with("lock_reason", reason.toString()).send();
@@ -126,6 +130,10 @@ public class GitHubAccessor {
                 .withUrlPath(pr.getApiRoute())
                 .withHeader("Accept", "application/vnd.github.v3.diff")
                 .fetchStream(input -> new String(input.readAllBytes()));
+    }
+
+    public static String getToken(GitHub gitHub) throws IOException {
+        return gitHub.getClient().getEncodedAuthorization().replace("Bearer ", "");
     }
 
     public interface IssueEdit {

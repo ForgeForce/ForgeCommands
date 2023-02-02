@@ -104,7 +104,7 @@ public class PushHandler implements EventHandler {
     }
 
     @Nullable
-    private static String getBranchName(String ref) {
+    public static String getBranchName(String ref) {
         if (ref.startsWith("refs/heads/")) {
             return ref.substring("refs/heads/".length());
         }

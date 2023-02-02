@@ -2,17 +2,17 @@ package net.minecraftforge.actionable;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectReader;
 import net.minecraftforge.actionable.event.EventHandler;
 import net.minecraftforge.actionable.event.IssueCommentHandler;
 import net.minecraftforge.actionable.event.IssueHandler;
 import net.minecraftforge.actionable.event.PRHandler;
 import net.minecraftforge.actionable.event.PRReviewHandler;
 import net.minecraftforge.actionable.event.PushHandler;
+import net.minecraftforge.actionable.event.pr_mirror.PRMirrorPRTarget;
+import net.minecraftforge.actionable.event.pr_mirror.PRMirrorPush;
 import net.minecraftforge.actionable.util.AuthUtil;
 import net.minecraftforge.actionable.util.GitHubEvent;
 import net.minecraftforge.actionable.util.GithubVars;
-import net.minecraftforge.actionable.util.Jsons;
 import net.minecraftforge.actionable.util.RepoConfig;
 import org.kohsuke.github.GHArtifact;
 import org.kohsuke.github.GitHub;
@@ -38,7 +38,6 @@ import java.util.zip.ZipInputStream;
 
 import static net.minecraftforge.actionable.util.GitHubEvent.ISSUES;
 import static net.minecraftforge.actionable.util.GitHubEvent.ISSUE_COMMENT;
-import static net.minecraftforge.actionable.util.GitHubEvent.PULL_REQUEST;
 import static net.minecraftforge.actionable.util.GitHubEvent.PULL_REQUEST_REVIEW;
 import static net.minecraftforge.actionable.util.GitHubEvent.PULL_REQUEST_TARGET;
 import static net.minecraftforge.actionable.util.GitHubEvent.PUSH;
@@ -49,20 +48,9 @@ public record Main(
 
     public static void main(String[] args) throws Throwable {
         final Map<GitHubEvent, Supplier<EventHandler>> handlers = new EnumMap<>(GitHubEvent.class);
-
-        {
-            handlers.put(PUSH, PushHandler::new);
-            handlers.put(ISSUES, IssueHandler::new);
-            handlers.put(ISSUE_COMMENT, IssueCommentHandler::new);
-            handlers.put(PULL_REQUEST_TARGET, PRHandler::new);
-            handlers.put(PULL_REQUEST_REVIEW, PRReviewHandler::new);
-        }
-
+        GithubVars.MODE.get().configureHandlerMap(handlers);
         new Main(handlers).run();
     }
-
-    public record Thingy(RepoConfig.TeamLike team) {}
-    public record ThingyNested(Thingy thingy) {}
 
     public void run() throws Throwable {
         if (GithubVars.GH_APP_NAME.get() == null || GithubVars.GH_APP_NAME.get().isBlank() || GithubVars.GH_APP_KEY.get() == null || GithubVars.GH_APP_KEY.get().isBlank()) {
@@ -109,13 +97,17 @@ public record Main(
         };
     }
 
+    public static String APP_NAME;
     private GitHub buildApi() throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
         final PrivateKey key = KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(AuthUtil.parsePKCS8(GithubVars.GH_APP_KEY.get())));
         final String appId = GithubVars.GH_APP_NAME.get();
 
         final AuthorizationProvider authorizationProvider = AuthUtil.jwt(appId, key, app ->
-                app.getInstallationByOrganization(GithubVars.REPOSITORY_OWNER.get())
-                        .createToken().create());
+        {
+            APP_NAME = app.getName();
+            return app.getInstallationByOrganization(GithubVars.REPOSITORY_OWNER.get())
+                    .createToken().create();
+        });
 
         return new GitHubBuilder()
                 .withAuthorizationProvider(authorizationProvider)
@@ -134,7 +126,8 @@ public record Main(
                 unsanitized.labelLocks() == null ? Map.of() : unsanitized.labelLocks(),
                 unsanitized.triage(),
                 unsanitized.labelTeams() == null ? new LinkedHashMap<>() : unsanitized.labelTeams(),
-                unsanitized.commands()
+                unsanitized.commands(),
+                unsanitized.privateMirror()
         );
     }
 
@@ -157,5 +150,28 @@ public record Main(
                 }
             };
         }
+    }
+
+    public enum Mode {
+        NORMAL {
+            @Override
+            public void configureHandlerMap(Map<GitHubEvent, Supplier<EventHandler>> handlers) {
+                handlers.put(PUSH, PushHandler::new);
+                handlers.put(ISSUES, IssueHandler::new);
+                handlers.put(ISSUE_COMMENT, IssueCommentHandler::new);
+                handlers.put(PULL_REQUEST_TARGET, PRHandler::new);
+                handlers.put(PULL_REQUEST_REVIEW, PRReviewHandler::new);
+            }
+        },
+
+        PRIVATE_PR_MIRROR {
+            @Override
+            public void configureHandlerMap(Map<GitHubEvent, Supplier<EventHandler>> handlers) {
+                handlers.put(PUSH, PRMirrorPush::new);
+                handlers.put(PULL_REQUEST_TARGET, PRMirrorPRTarget::new);
+            }
+        };
+
+        public abstract void configureHandlerMap(Map<GitHubEvent, Supplier<EventHandler>> handlers);
     }
 }

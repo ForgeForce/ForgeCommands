@@ -37,7 +37,9 @@ public record RepoConfig(
     @Nullable Triage triage,
     LinkedHashMap<String, TeamLike> labelTeams,
 
-    @Nullable Commands commands
+    @Nullable Commands commands,
+
+    @Nullable PrivateMirror privateMirror
 ) {
     public static final RepoConfig DEFAULT = new RepoConfig(
             Stream.of(Label.values()).collect(Collectors.toMap(a -> a.id, a -> a.defaultName)),
@@ -51,7 +53,8 @@ public record RepoConfig(
             new Triage("triage", 4),
             new LinkedHashMap<>(),
 
-            new Commands(List.of("/"), false, true, true)
+            new Commands(List.of("/"), false, true, true),
+            null
     );
     public static final ObjectMapper MAPPER = new ObjectMapper(new YAMLFactory().disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER).enable(YAMLGenerator.Feature.LITERAL_BLOCK_STYLE));
 
@@ -96,6 +99,8 @@ public record RepoConfig(
     ) {}
 
     public record ConfigLocation(String repository, String directory, String branch) {}
+
+    public record PrivateMirror(String mirror, List<String> toAdd) {}
 
     @JsonSerialize(using = TeamLike.Serializer.class)
     @JsonDeserialize(using = TeamLike.Deserializer.class)

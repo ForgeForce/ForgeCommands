@@ -73,4 +73,19 @@ public class FunctionalInterfaces {
     public interface SupplierException<T> {
         T get() throws IOException;
     }
+
+    public static <T> SupplierAllEx<T> supEx(SupplierAllEx<T> sup) {
+        return sup;
+    }
+
+    public interface SupplierAllEx<T> {
+        T get() throws Exception;
+        default T uncheck() {
+            try {
+                return get();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
 }
