@@ -10,6 +10,7 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
 import java.io.IOException;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -74,8 +75,28 @@ public class FunctionalInterfaces {
         };
     }
 
+    @SuppressWarnings("unchecked")
+    public static <E extends Throwable> void sneakyThrow(Throwable ex) throws E {
+        throw (E) ex;
+    }
+
+    public static <T, R> Function<T, R> throwingFunc(FuncException<T, R> func) {
+        return t -> {
+            try {
+                return func.apply(t);
+            } catch (Exception ex) {
+                sneakyThrow(ex);
+                return null; // Should never be reached
+            }
+        };
+    }
+
     public interface ConsException<T> {
         void accept(T t) throws Exception;
+    }
+
+    public interface FuncException<T, R> {
+        R apply(T t) throws Exception;
     }
 
     public interface PredException<T> {
