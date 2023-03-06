@@ -17,7 +17,7 @@ public class DiffUtils {
         for (int i = 0; i < diffByLine.length; i++) {
             final String line = diffByLine[i];
             if (line.equals(NO_OLD_FILE)) {
-                newFiles.add(diffByLine[i + 1].substring(FILE_ADDED_MARKER.length() + 2)); // +++ b/...
+                newFiles.add(diffByLine[i + 1].substring(FILE_ADDED_MARKER.length() + 1));
                 i++; // Skip the add marker
             }
         }

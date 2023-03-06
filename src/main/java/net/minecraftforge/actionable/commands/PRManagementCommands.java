@@ -9,7 +9,6 @@ import net.minecraftforge.actionable.annotation.Argument;
 import net.minecraftforge.actionable.annotation.Command;
 import net.minecraftforge.actionable.annotation.StringType;
 import net.minecraftforge.actionable.annotations.Require;
-import net.minecraftforge.actionable.checks.LicenseCheck;
 import net.minecraftforge.actionable.commands.lib.Requirement;
 import net.minecraftforge.actionable.util.Label;
 import org.kohsuke.github.GHIssue;
@@ -58,12 +57,6 @@ public class PRManagementCommands {
         final String title = pr.getTitle() + " (#" + pr.getNumber() + ")";
         GitHubAccessor.merge(pr, title, null, GHPullRequest.MergeMethod.SQUASH);
         pr.comment(":shipit:");
-    }
-
-    @Require({Requirement.CAN_MANAGE_ISSUE})
-    @Command(name = "check", category = GROUP, description = "Run PR checks such as license checks.")
-    public static void check(GitHub gh, GHPullRequest pr) throws Exception {
-        LicenseCheck.check(gh, pr);
     }
 
     private static String parseTeam(String input) {

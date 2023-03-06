@@ -42,10 +42,6 @@ public class GithubVars {
             if (value == null) value = mapper.apply(System.getenv(key));
             return value;
         }
-
-        public String getKey() {
-            return key;
-        }
     }
 
     public enum Type {

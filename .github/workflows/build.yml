@@ -36,5 +36,5 @@ jobs:
           git config --global user.name "autoforge"
           
           git add dist/app.jar
-          git commit -m "Build dist jar"
+          git commit -m "Built dist jar"
           git push
